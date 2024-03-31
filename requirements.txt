@@ -1,0 +1,8 @@
+dspy-ai
+dspy-ai[chromadb]
+google-generativeai
+Jinja2
+langchain
+langchain-google-genai
+pillow
+xmltodict

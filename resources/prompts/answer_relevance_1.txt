@@ -1,0 +1,14 @@
+Generate {num_questions_to_generate} question for the given answer and context.
+
+answer: {answer}
+context: {context}
+
+Return the output using the following XML format.
+
+<result>
+    <questions>
+        <question>generated question 1</question>
+        <question>generated question 2</question>
+        ...
+    </questions>
+</result>

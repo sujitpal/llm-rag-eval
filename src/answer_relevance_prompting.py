@@ -1,12 +1,12 @@
 import asyncio
-import json
-import logging
 import numpy as np
-import os
 
-from dotenv import find_dotenv, load_dotenv
 from langchain_core.output_parsers import StrOutputParser
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+# from langchain_google_genai import (
+#     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+# )
+from langchain_core.embeddings import Embeddings
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
@@ -14,14 +14,8 @@ from typing import List
 from common_utils import read_template_from_file, parse_response
 
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
-
 PROMPT_GEN_QUESTIONS = "answer_relevance_1.txt"
 PROMPT_CLASSIFY_NONCOMMITTAL = "answer_relevance_2.txt"
-
-DATA_DIR = "../data"
-REPORTS_DIR = os.path.join(DATA_DIR, "reports")
 
 
 class ClassifiedQAPair(BaseModel):
@@ -41,8 +35,8 @@ def _cosine_similarity(query_vector, doc_vectors):
 async def compute_answer_relevance(question: str,
                                    context: List[str],
                                    answer: str,
-                                   model: ChatGoogleGenerativeAI,
-                                   encoder: GoogleGenerativeAIEmbeddings,
+                                   model: BaseChatModel,
+                                   encoder: Embeddings,
                                    logger,
                                    num_questions_to_generate: int = 5
                                    ) -> float:
@@ -97,40 +91,3 @@ async def compute_answer_relevance(question: str,
         E = np.array(embeddings)
         source, target = E[0, :], E[1:, :]
         return _cosine_similarity(source, target)
-
-
-async def runner():
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
-    _ = load_dotenv(find_dotenv())
-
-    model = ChatGoogleGenerativeAI(
-        model="gemini-pro",
-        api_key=os.environ["GOOGLE_API_KEY"],
-        temperature=0.3)
-    encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
-    os.makedirs(REPORTS_DIR, exist_ok=True)
-
-    input_fp = os.path.join(DATA_DIR, "goldset_ragas.jsonl")
-    output_fp = os.path.join(REPORTS_DIR, "answer_relevance_report.tsv")
-    with open(input_fp, "r", encoding="utf-8") as fin, \
-         open(output_fp, "w", encoding="utf-8") as fout:
-        fout.write("\t".join(["#QID", "ANSWER_RELEVANCE"]) + "\n")
-        for line in fin:
-            record = json.loads(line)
-            id = record["id"]
-            question = record["query"]
-            context = [ctx["chunk_text"] for ctx in record["context"]]
-            answer = record["predicted_answer"]
-            relevance = await compute_answer_relevance(
-                question, context, answer, model, encoder, logger)
-            logger.info(
-                f"query ({id}): {question}, answer relevance: {relevance:.3f}")
-            fout.write(f"{id}\t{relevance:.3f}\n")
-            # break
-
-
-if __name__ == "__main__":
-    asyncio.run(runner())

@@ -3,7 +3,7 @@ import re
 import xmltodict
 
 from pydantic.generics import GenericModel
-from pydantic import Field
+from pydantic import BaseModel, Field
 from typing import List, TypeVar, Generic
 
 
@@ -47,3 +47,24 @@ def read_template_from_file(prompt_fn: str,
     with open(prompt_fp, "r", encoding="utf-8") as f:
         prompt_template_text = f.read()
     return prompt_template_text
+
+
+#################### verdict processing ################################
+
+
+class Verdict(BaseModel):
+    statement: str = Field(alias="statement", description="The statement")
+    reason: str = Field(alias="reason", description="Reason for verdict")
+    infer: str = Field(alias="infer", description="The inference (0/1)")
+
+
+def parse_verdicts_from_result(result) -> List[Verdict]:
+    verdicts_el = result.value["verdicts"]
+    if verdicts_el is None:
+        return []
+    verdict_el = verdicts_el["verdict"]
+    if isinstance(verdict_el, dict):
+        verdicts = [Verdict(**verdict_el)]
+    else:
+        verdicts = [Verdict(**verdict_dict) for verdict_dict in verdict_el]
+    return verdicts

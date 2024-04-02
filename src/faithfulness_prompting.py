@@ -6,17 +6,17 @@ from langchain.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
 
-from common_utils import read_template_from_file, parse_response
+from common_utils import read_template_from_file, parse_response, Verdict
 
 
 PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER = "faithfulness_1.txt"
 PROMPT_INFER_ENTAILMENT_FROM_CONTEXT = "faithfulness_2.txt"
 
 
-class Verdict(BaseModel):
-    statement: str = Field(alias="statement", description="The statement")
-    reason: str = Field(alias="reason", description="Reason for verdict")
-    infer: str = Field(alias="infer", description="The inference (0/1)")
+# class Verdict(BaseModel):
+#     statement: str = Field(alias="statement", description="The statement")
+#     reason: str = Field(alias="reason", description="Reason for verdict")
+#     infer: str = Field(alias="infer", description="The inference (0/1)")
 
 
 def reformat_statements_to_xml(statements: List[str]) -> str:

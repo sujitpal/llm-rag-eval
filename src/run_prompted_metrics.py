@@ -12,6 +12,8 @@ from langchain_google_genai import (
 
 from faithfulness_prompting import compute_faithfulness
 from answer_relevance_prompting import compute_answer_relevance
+from context_precision_prompting import compute_context_precision
+
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
@@ -24,6 +26,7 @@ class Metrics(Enum):
     FAITHFULNESS = "faithfulness"
     ANSWER_RELEVANCE = "answer_relevance"
     CONTEXT_PRECISION = "context_precision"
+    CONTEXT_UTILIZATION = "context_utilization"
     CONTEXT_RELEVANCE = "context_relevance"
     CONTEXT_RECALL = "context_recall"
     ANSWER_SIMILARITY = "answer_similarity"
@@ -69,11 +72,14 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            if int(id) <= 20:
-                continue
+            # if int(id) > 3:
+            #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
+            ideal_answer = record["ideal_answer"]
+
+            print("#-context:", len(context))
 
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
@@ -82,6 +88,12 @@ async def runner():
                 case Metrics.ANSWER_RELEVANCE:
                     metric_value = await compute_answer_relevance(
                         question, context, answer, model, encoder, logger)
+                case Metrics.CONTEXT_PRECISION:
+                    metric_value = await compute_context_precision(
+                        question, context, ideal_answer, model, logger)
+                case Metrics.CONTEXT_UTILIZATION:
+                    metric_value = await compute_context_precision(
+                        question, context, answer, model, logger)
                 case _:
                     logger.error(f"Unsupported metric: {metric}")
                     break

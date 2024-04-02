@@ -22,7 +22,8 @@ async def compute_context_precision(question: str,
                                     context: List[str],
                                     answer: str,
                                     model: BaseChatModel,
-                                    logger) -> float:
+                                    logger,
+                                    parallel: bool = True) -> float:
 
     prompt_template = read_template_from_file(PROMPT_CONTEXT_PRECISION)
     prompt_cprec = PromptTemplate(
@@ -31,30 +32,30 @@ async def compute_context_precision(question: str,
     chain_cprec = prompt_cprec | model | StrOutputParser()
 
     verdicts = []
-    for ctx in context:
-        response = chain_cprec.invoke({
-            "question": question,
-            "context": ctx,
-            "answer": answer
-        })
-        result = parse_response(response)
-        verdicts.append(Verdict(**result.value["verdict"]))
+    if parallel:
+        tasks = []
+        for ctx in context:
+            tasks.append(chain_cprec.ainvoke({
+                "question": question,
+                "context": ctx,
+                "answer": answer
+            }))
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            result = parse_response(response)
+            verdict = Verdict(**result.value["verdict"])
+            verdicts.append(verdict)        
+    else:
+        for ctx in context:
+            response = chain_cprec.invoke({
+                "question": question,
+                "context": ctx,
+                "answer": answer
+            })
+            result = parse_response(response)
+            verdicts.append(Verdict(**result.value["verdict"]))
 
-    # tasks = []
-    # for ctx in context:
-    #     tasks.append(chain_cprec.ainvoke({
-    #         "question": question,
-    #         "context": ctx,
-    #         "answer": answer
-    #     }))
-    # responses = await asyncio.gather(*tasks)
-    # verdicts = []
-    # for response in responses:
-    #     result = parse_response(response)
-    #     verdict = Verdict(**result.value["verdict"])
-    #     verdicts.append(verdict)
-    
-    # time.sleep(1)
+    logger.debug(f"verdicts: {verdicts}")
 
     # precision@k (for k=1..K)
     scores = [int(verdict.infer) for verdict in verdicts]

@@ -32,7 +32,8 @@ async def compute_faithfulness(question: str,
                                answer: str,
                                context: List[str],
                                model: BaseChatModel,
-                               logger) -> float:
+                               logger,
+                               parallel: bool = True) -> float:
     prompt_template = read_template_from_file(
         PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER)
     prompt_ans_to_stmt = PromptTemplate(template=prompt_template,
@@ -56,22 +57,39 @@ async def compute_faithfulness(question: str,
     chain_nli = prompt_nli | model | StrOutputParser()
 
     num_entailed, num_total = 0, 0
-    tasks, verdicts = [], []
-    for ctx in context:
-        tasks.append(chain_nli.ainvoke({
-            "context": ctx,
-            "statements_xml": statements_xml
-        }))
-    responses = await asyncio.gather(*tasks)
-    for response in responses:
-        result = parse_response(response)
-        logger.debug(f"entailment verdicts: {result}")
-        verdicts = result.value["verdicts"]["verdict"]
-        for verdict_dict in verdicts:
-            verdict = Verdict(**verdict_dict)
-            if verdict.infer == "1":
-                num_entailed += 1
-            num_total += 1
+
+    if parallel:
+        tasks = []
+        for ctx in context:
+            tasks.append(chain_nli.ainvoke({
+                "context": ctx,
+                "statements_xml": statements_xml
+            }))
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            result = parse_response(response)
+            logger.debug(f"entailment verdicts: {result}")
+            verdicts = result.value["verdicts"]["verdict"]
+            for verdict_dict in verdicts:
+                verdict = Verdict(**verdict_dict)
+                if verdict.infer == "1":
+                    num_entailed += 1
+                num_total += 1
+    else:
+        for ctx in context:
+            response = chain_nli.invoke({
+                "context": ctx,
+                "statements_xml": statements_xml
+            })
+            result = parse_response(response)
+            logger.debug(f"entailment verdicts: {result}")
+            verdicts = result.value["verdicts"]["verdict"]
+            for verdict_dict in verdicts:
+                verdict = Verdict(**verdict_dict)
+                if verdict.infer == "1":
+                    num_entailed += 1
+                num_total += 1
+
     logger.debug(f"num_entailed: {num_entailed}, num_total: {num_total}")
 
     try:

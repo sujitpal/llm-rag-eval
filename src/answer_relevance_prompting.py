@@ -38,7 +38,8 @@ async def compute_answer_relevance(question: str,
                                    model: BaseChatModel,
                                    encoder: Embeddings,
                                    logger,
-                                   num_questions_to_generate: int = 5
+                                   num_questions_to_generate: int = 5,
+                                   parallel: bool = True
                                    ) -> float:
     # reformat context
     context_flat = " ".join([f"{i+1}. {chunk}" 
@@ -65,18 +66,30 @@ async def compute_answer_relevance(question: str,
     prompt = PromptTemplate(template=prompt_anc,
                             input_variables=["question", "context"])
     chain_anc = prompt | model | StrOutputParser()
-    tasks = []
-    for gen_question in gen_questions:
-        tasks.append(chain_anc.ainvoke({
-            "question": gen_question,
-            "context": context
-        }))
-    responses = await asyncio.gather(*tasks)
+
     qa_pairs = []
-    for response in responses:
-        result = parse_response(response)
-        qa_pair = ClassifiedQAPair(**result.value["qa_pair"])
-        qa_pairs.append(qa_pair)
+    if parallel:
+        tasks = []
+        for gen_question in gen_questions:
+            tasks.append(chain_anc.ainvoke({
+                "question": gen_question,
+                "context": context
+            }))
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            result = parse_response(response)
+            qa_pair = ClassifiedQAPair(**result.value["qa_pair"])
+            qa_pairs.append(qa_pair)
+    else:
+        for gen_question in gen_questions:
+            response = chain_anc.invoke({
+                "question": gen_question,
+                "context": context
+            })
+            result = parse_response(response)
+            qa_pair = ClassifiedQAPair(**result.value["qa_pair"])
+            qa_pairs.append(qa_pair)
+
     logger.debug(f"qa_pairs: {qa_pairs}")
 
     # if all non-committal questions, then answer is not relevant

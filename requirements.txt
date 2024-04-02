@@ -1,8 +1,9 @@
+Jinja2
 dspy-ai
 dspy-ai[chromadb]
 google-generativeai
-Jinja2
 langchain
 langchain-google-genai
+nltk
 pillow
 xmltodict

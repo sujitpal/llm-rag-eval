@@ -1,0 +1,26 @@
+You are provided a question with a list of context sentences. The context sentences
+are provided as a Markdown list.
+
+For each pair of question and context sentence, identify if the sentence is absolutely
+necessary to answer the question. Give a verdict of "1" if the sentence is absolutely
+necessary to answer the question or "0" if not.
+
+Include in the output ONLY sentences with verdict of "1".
+
+question: {question}
+context: ```
+{context}
+```
+
+Provide your response in the following XML format:
+
+<result>
+    <verdicts>
+        <verdict>
+            <statement>text of sentence</statement>
+            <reason>reasoning for why sentence is useful for question</reason>
+            <infer>0 or 1</infer>
+        </verdict>
+        ...
+    </verdicts>
+</result>

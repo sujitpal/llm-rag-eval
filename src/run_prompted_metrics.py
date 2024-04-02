@@ -13,7 +13,7 @@ from langchain_google_genai import (
 from faithfulness_prompting import compute_faithfulness
 from answer_relevance_prompting import compute_answer_relevance
 from context_precision_prompting import compute_context_precision
-
+from context_relevance_prompting import compute_context_relevance
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
@@ -36,7 +36,7 @@ class Metrics(Enum):
 async def runner():
 
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--metric", type=str,
@@ -47,12 +47,15 @@ async def runner():
                         help="Full path to evaluation data in JSONL format")
     parser.add_argument("--output-tsv", type=str, required=False,
                         help="Full path to output TSV file")
+    parser.add_argument("--parallel", action="store_true",
+                        help="Run in parallel where possible (default false)")
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input_jsonl
     output_fp = args.output_tsv
     if output_fp is None:
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
+    run_in_parallel = args.parallel
 
     _ = load_dotenv(find_dotenv())
 
@@ -79,24 +82,30 @@ async def runner():
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
 
-            print("#-context:", len(context))
-
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     metric_value = await compute_faithfulness(
-                        question, answer, context, model, logger)
+                        question, answer, context, model, logger,
+                        parallel=run_in_parallel)
                 case Metrics.ANSWER_RELEVANCE:
                     metric_value = await compute_answer_relevance(
-                        question, context, answer, model, encoder, logger)
+                        question, context, answer, model, encoder, logger,
+                        parallel=run_in_parallel)
                 case Metrics.CONTEXT_PRECISION:
                     metric_value = await compute_context_precision(
-                        question, context, ideal_answer, model, logger)
+                        question, context, ideal_answer, model, logger,
+                        parallel=run_in_parallel)
                 case Metrics.CONTEXT_UTILIZATION:
                     metric_value = await compute_context_precision(
-                        question, context, answer, model, logger)
+                        question, context, answer, model, logger,
+                        parallel=run_in_parallel)
+                case Metrics.CONTEXT_RELEVANCE:
+                    metric_value = await compute_context_relevance(
+                        question, context, model, logger,
+                        parallel=run_in_parallel)
                 case _:
                     logger.error(f"Unsupported metric: {metric}")
-                    break
+                    # break
 
             logger.info(
                 f"query ({id}): {question}, {metric}: {metric_value}")

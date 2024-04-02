@@ -2,9 +2,6 @@ import asyncio
 import numpy as np
 
 from langchain_core.output_parsers import StrOutputParser
-# from langchain_google_genai import (
-#     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-# )
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate

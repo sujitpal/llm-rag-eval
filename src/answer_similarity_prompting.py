@@ -4,8 +4,8 @@ import numpy as np
 from langchain_core.embeddings import Embeddings
 
 
-def compute_answer_similarity(predicted_answer: str,
-                              ideal_answer: str,
+def compute_answer_similarity(ideal_answer: str,
+                              predicted_answer: str,
                               encoder: Embeddings,
                               logger,
                               cross_encoder: bool = True) -> float:
@@ -23,10 +23,12 @@ def compute_answer_similarity(predicted_answer: str,
         ia_vecs = np.array(embs[len(pa_words):])
         similarity = (np.sum(
             np.max(
-                np.dot(pa_vecs, ia_vecs.T),
-                axis=1
+                np.dot(ia_vecs, pa_vecs.T) / (
+                    np.linalg.norm(ia_vecs, axis=1)[:, None] *
+                    np.linalg.norm(pa_vecs, axis=1)[None, :]
+                ), axis=1
             )
-        ) / len(pa_words))
+        ) / len(ia_words))
     else:
         # use cosine similarity
         # NOTE: RAGAS docs mention using cross-encoder similarity but

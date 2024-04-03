@@ -54,7 +54,7 @@ async def runner():
     parser.add_argument("--parallel", action="store_true",
                         help="Run in parallel where possible (default false)")
     parser.add_argument("--cross-encoder", action="store_false",
-                        help="Use cross-encoder similarity scoring (default false)")
+                        help="Use cross-encoder similarity scoring (default true)")
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input_jsonl
@@ -120,7 +120,7 @@ async def runner():
                         answer, ideal_answer, encoder, logger)
                 case Metrics.ANSWER_CORRECTNESS:
                     metric_value = compute_answer_correctness(
-                        answer, ideal_answer, model, logger)
+                        ideal_answer, answer, model, logger)
                 case _:
                     logger.error(f"Unsupported metric: {metric}")
 

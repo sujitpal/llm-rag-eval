@@ -1,9 +1,11 @@
 Jinja2
 dspy-ai
 dspy-ai[chromadb]
+hvplot
 google-generativeai
 langchain
 langchain-google-genai
 nltk
 pillow
+polars
 xmltodict

@@ -36,7 +36,20 @@ TBD
 
 ## Running RAGAS metrics
 
-You can run all the RAGAS metrics against your dataset by calling the `run_prompted_metrics.py` script in the `src` directory, with the path to the input (provided in JSON-L), the path to the output (TSV) file, and the appropriate metric name.
+The following RAGAS metrics have been (re-)implemented in this project (because
+I had trouble making them work as-is, and because they are conceptually quite 
+simple to implement).
+
+* [Faithfulness](https://docs.ragas.io/en/stable/concepts/metrics/faithfulness.html) -- given question, context and answer, measures factual consistency of the answer against the given context.
+* [Answer Relevance](https://docs.ragas.io/en/stable/concepts/metrics/answer_relevance.html) -- given question, context and answer, measures how pertinent the answer is to the question.
+* [Context Precision](https://docs.ragas.io/en/stable/concepts/metrics/context_precision.html) -- given question, context and ground truth, measures whether statements in the ground truth are found in context.
+* Context Utilization -- same as Context Precision, using the predicted answer instead of the ground truth.
+* [Context Relevance](https://docs.ragas.io/en/stable/concepts/metrics/context_relevancy.html) -- given question and context, measures relevance of the context against the question.
+* [Context Recall](https://docs.ragas.io/en/stable/concepts/metrics/context_recall.html) -- given the context and answer, measures extent to which context aligns with the answer.
+* [Answer Similarity](https://docs.ragas.io/en/stable/concepts/metrics/semantic_similarity.html) -- given answer and ground truth, measures semantic similarity between them (cosine or cross encoder similarity).
+* [Answer Correctness](https://docs.ragas.io/en/stable/concepts/metrics/answer_correctness.html) -- given answer and ground truth, measures the accuracy given facts in these two texts.
+
+The metrics described above can be run against your dataset by calling the `run_prompted_metrics.py` script in the `src` directory, with the path to the input (provided in JSON-L), the path to the output (TSV) file, and the appropriate metric name.
 
 ```
 $ python3 run_prompted_metrics.py --help

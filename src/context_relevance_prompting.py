@@ -4,22 +4,15 @@ import nltk
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
-from pydantic import BaseModel, Field
 from typing import List, Tuple
 
 from common_utils import (
     read_template_from_file, parse_response,
-    parse_verdicts_from_result, Verdict
+    parse_verdicts_from_result
 )
 
 
 PROMPT_CLASSIFY_NECESSARY = "context_relevance_1.txt"
-
-
-# class Verdict(BaseModel):
-#     statement: str = Field(alias="statement", description="The statement")
-#     reason: str = Field(alias="reason", description="Reason for verdict")
-#     infer: str = Field(alias="infer", description="The inference (0/1)")
 
 
 def _convert_to_markdown_list(context: str) -> Tuple[int, str]:
@@ -28,18 +21,6 @@ def _convert_to_markdown_list(context: str) -> Tuple[int, str]:
         context_sents.append(sent)
     context_markdown = "\n".join([f"- {sent}" for sent in context_sents])
     return len(context_sents), context_markdown
-
-
-# def _parse_verdicts_from_result(result) -> List[Verdict]:
-#     verdicts_el = result.value["verdicts"]
-#     if verdicts_el is None:
-#         return []
-#     verdict_el = verdicts_el["verdict"]
-#     if isinstance(verdict_el, dict):
-#         verdicts = [Verdict(**verdict_el)]
-#     else:
-#         verdicts = [Verdict(**verdict_dict) for verdict_dict in verdict_el]
-#     return verdicts
 
 
 async def compute_context_relevance(question: str,

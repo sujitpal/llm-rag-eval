@@ -16,6 +16,7 @@ from context_precision_prompting import compute_context_precision
 from context_relevance_prompting import compute_context_relevance
 from context_recall_prompting import compute_context_recall
 from answer_similarity_prompting import compute_answer_similarity
+from answer_correctness_prompting import compute_answer_correctness
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -78,8 +79,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) != 25:
-            #     continue
+            if int(id) != 25:
+                continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
@@ -113,9 +114,11 @@ async def runner():
                 case Metrics.ANSWER_SIMILARITY:
                     metric_value = compute_answer_similarity(
                         answer, ideal_answer, encoder, logger)
+                case Metrics.ANSWER_CORRECTNESS:
+                    metric_value = compute_answer_correctness(
+                        answer, ideal_answer, model, logger)
                 case _:
                     logger.error(f"Unsupported metric: {metric}")
-                    # break
 
             logger.info(
                 f"query ({id}): {question}, {metric}: {metric_value}")

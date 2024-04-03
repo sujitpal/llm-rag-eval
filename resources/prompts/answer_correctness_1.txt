@@ -1,0 +1,63 @@
+Given a ground truth and an answer, analyze each statement in the answer and 
+classify them in one of the following categories:
+
+- TP (true positive): statements that are present in both the answer and the ground truth,
+- FP (false positive): statements present in the answer but not found in the ground truth,
+- FN (false negative): relevant statements found in the ground truth but omitted in the answer.
+
+You must classify a single statement you must classify in exactly one category. Do not
+try to interpret the meaning of the ground truth or the answer, just compare the presence
+of the statements in them.
+
+Here are a few examples:
+
+answer: ```The sun is powered by nuclear fission, similar to nuclear reactors on Earth, and its primary function is to provide light to the solar system.```
+ground_truth: ```The sun is actually powered by nuclear fusion, not fission. In its core, hydrogen atoms fuse to form helium, releasing a tremendous amount of energy. This energy is what lights up the sun and provides heat and light, essential for life on Earth. The sun's light also plays a critical role in Earth's climate system and helps to drive the weather and ocean currents.```
+output: <result>
+    <classes>
+        <TP>
+            <sts>
+                <st>The sun's primary function is to provide light</st>
+            </sts>
+        </TP>
+        <FP>
+            <sts>
+                <st>The sun is powered by nuclear fission</st>
+                <st>similar to nuclear reactors on Earth</st>
+            </sts>
+        </FP>
+        <FN>
+            <sts>
+                <st>The sun is powered by nuclear fusion, not fission</st>
+                <st>In its core, hydrogen atoms fuse to form helium, releasing a tremendous amount of energy</st>
+                <st>This energy provides heat and light, essential for life on Earth</st>
+                <st>The sun's light plays a critical role in Earth's climate system</st>
+                <st>The sun helps to drive the weather and ocean currents</st>
+            </sts>
+        </FN>
+    </classes>
+</result>
+
+answer: ```The boiling point of water is 100 degrees Celsius at sea level.```
+ground_truth: ```The boiling point of water is 100 degrees Celsius (212 degrees Fahrenheit) at sea level, but it can change with altitude.```
+output: <result>
+    <classes>
+        <TP>
+            <sts>
+                <st>The boiling point of water is 100 degrees Celsius at sea level</st>
+            </sts>
+        </TP>
+        <FP>
+        </FP>
+        <FN>
+            <sts>
+                <st>The boiling point can change with altitude</st>
+                <st>The boiling point of water is 212 degrees Fahrenheit at sea level</st>
+            </sts>
+        </FN>
+    </classes>
+</result>
+
+answer: ```{answer}```
+ground_truth: ```{ground_truth}```
+output:

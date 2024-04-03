@@ -53,6 +53,8 @@ async def runner():
                         help="Full path to output TSV file")
     parser.add_argument("--parallel", action="store_true",
                         help="Run in parallel where possible (default false)")
+    parser.add_argument("--cross-encoder", action="store_false",
+                        help="Use cross-encoder similarity scoring (default false)")
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input_jsonl
@@ -60,6 +62,7 @@ async def runner():
     if output_fp is None:
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
     run_in_parallel = args.parallel
+    use_cross_encoder = args.cross_encoder
 
     _ = load_dotenv(find_dotenv())
 
@@ -79,8 +82,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            if int(id) != 25:
-                continue
+            # if int(id) != 25:
+            #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
@@ -110,7 +113,8 @@ async def runner():
                 case Metrics.CONTEXT_RECALL:
                     metric_value = await compute_context_recall(
                         context, ideal_answer, model, logger,
-                        parallel=run_in_parallel)
+                        parallel=run_in_parallel,
+                        cross_encoder=use_cross_encoder)
                 case Metrics.ANSWER_SIMILARITY:
                     metric_value = compute_answer_similarity(
                         answer, ideal_answer, encoder, logger)

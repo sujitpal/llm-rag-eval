@@ -1,7 +1,6 @@
 Jinja2
 dspy-ai
 dspy-ai[chromadb]
-hvplot
 google-generativeai
 langchain
 langchain-google-genai

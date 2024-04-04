@@ -39,9 +39,6 @@ class Metrics(Enum):
 
 async def runner():
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--metric", type=str,
                         choices=sorted([m.value for m in Metrics]),
@@ -55,6 +52,8 @@ async def runner():
                         help="Run in parallel where possible (default false)")
     parser.add_argument("--cross-encoder", action="store_false",
                         help="Use cross-encoder similarity scoring (default true)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Turn debugging on (default: false)")
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input_jsonl
@@ -63,6 +62,10 @@ async def runner():
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
     run_in_parallel = args.parallel
     use_cross_encoder = args.cross_encoder
+    debug = args.debug
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     _ = load_dotenv(find_dotenv())
 
@@ -82,8 +85,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) != 25:
-            #     continue
+            if int(id) <= 2:
+                continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]

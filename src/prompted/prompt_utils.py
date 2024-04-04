@@ -38,7 +38,7 @@ def parse_response(response):
 ################ parse LLM output to Pydantic object ################
 
 
-PROMPT_DIR = "../../resources/prompts"
+PROMPT_DIR = "../resources/prompts"
 
 
 def read_template_from_file(prompt_fn: str,

@@ -8,7 +8,7 @@ from langchain.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
 
-from common_utils import read_template_from_file, parse_response
+from .prompt_utils import read_template_from_file, parse_response
 
 
 PROMPT_GEN_QUESTIONS = "answer_relevance_1.txt"

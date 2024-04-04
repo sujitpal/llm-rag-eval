@@ -6,7 +6,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
 from typing import List, Tuple
 
-from common_utils import (
+from .prompt_utils import (
     read_template_from_file, parse_response,
     parse_verdicts_from_result
 )

@@ -10,13 +10,13 @@ from langchain_google_genai import (
     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 )
 
-from faithfulness_prompting import compute_faithfulness
-from answer_relevance_prompting import compute_answer_relevance
-from context_precision_prompting import compute_context_precision
-from context_relevance_prompting import compute_context_relevance
-from context_recall_prompting import compute_context_recall
-from answer_similarity_prompting import compute_answer_similarity
-from answer_correctness_prompting import compute_answer_correctness
+from prompted.faithfulness import compute_faithfulness
+from prompted.answer_relevance import compute_answer_relevance
+from prompted.context_precision import compute_context_precision
+from prompted.context_relevance import compute_context_relevance
+from prompted.context_recall import compute_context_recall
+from prompted.answer_similarity import compute_answer_similarity
+from prompted.answer_correctness import compute_answer_correctness
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)

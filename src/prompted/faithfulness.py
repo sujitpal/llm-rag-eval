@@ -5,7 +5,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
 from typing import List
 
-from common_utils import read_template_from_file, parse_response, Verdict
+from .prompt_utils import read_template_from_file, parse_response, Verdict
 
 
 PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER = "faithfulness_1.txt"

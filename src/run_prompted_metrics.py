@@ -10,13 +10,13 @@ from langchain_google_genai import (
     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 )
 
-from faithfulness_prompting import compute_faithfulness
-from answer_relevance_prompting import compute_answer_relevance
-from context_precision_prompting import compute_context_precision
-from context_relevance_prompting import compute_context_relevance
-from context_recall_prompting import compute_context_recall
-from answer_similarity_prompting import compute_answer_similarity
-from answer_correctness_prompting import compute_answer_correctness
+from prompted.faithfulness import compute_faithfulness
+from prompted.answer_relevance import compute_answer_relevance
+from prompted.context_precision import compute_context_precision
+from prompted.context_relevance import compute_context_relevance
+from prompted.context_recall import compute_context_recall
+from prompted.answer_similarity import compute_answer_similarity
+from prompted.answer_correctness import compute_answer_correctness
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -39,9 +39,6 @@ class Metrics(Enum):
 
 async def runner():
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--metric", type=str,
                         choices=sorted([m.value for m in Metrics]),
@@ -55,6 +52,8 @@ async def runner():
                         help="Run in parallel where possible (default false)")
     parser.add_argument("--cross-encoder", action="store_false",
                         help="Use cross-encoder similarity scoring (default true)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Turn debugging on (default: false)")
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input_jsonl
@@ -63,6 +62,10 @@ async def runner():
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
     run_in_parallel = args.parallel
     use_cross_encoder = args.cross_encoder
+    debug = args.debug
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
     _ = load_dotenv(find_dotenv())
 
@@ -82,8 +85,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) != 25:
-            #     continue
+            if int(id) <= 2:
+                continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]

@@ -5,14 +5,14 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
 from typing import List
 
-from common_utils import read_template_from_file, parse_response, Verdict
+from .prompt_utils import read_template_from_file, parse_response, Verdict
 
 
 PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER = "faithfulness_1.txt"
 PROMPT_INFER_ENTAILMENT_FROM_CONTEXT = "faithfulness_2.txt"
 
 
-def reformat_statements_to_xml(statements: List[str]) -> str:
+def _reformat_statements_to_xml(statements: List[str]) -> str:
     statements_xml = ["<statements>"]
     for statement in statements:
         statements_xml.append(f" <statement>{statement}</statement>")
@@ -20,12 +20,10 @@ def reformat_statements_to_xml(statements: List[str]) -> str:
     return "\n".join(statements_xml)
 
 
-async def compute_faithfulness(question: str,
-                               answer: str,
-                               context: List[str],
-                               model: BaseChatModel,
-                               logger,
-                               parallel: bool = True) -> float:
+def _get_statements_from_answer(question: str,
+                                answer: str,
+                                model: BaseChatModel,
+                                logger) -> List[str]:
     prompt_template = read_template_from_file(
         PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER)
     prompt_ans_to_stmt = PromptTemplate(template=prompt_template,
@@ -36,20 +34,27 @@ async def compute_faithfulness(question: str,
         "answer": answer
     })
     result = parse_response(response)
-    logger.debug(f"extracted statements from answer: {result}")
     statements = result.value["statements"]["statement"]
-    
-    statements_xml = reformat_statements_to_xml(statements)
-    logger.debug(f"statements_xml: {statements_xml}"
-                 )
+    logger.debug(f"statements: {statements}")
+    return statements
+
+
+async def _get_entailments_from_context(context: List[str],
+                                        statements: List[str],
+                                        model: BaseChatModel,
+                                        logger,
+                                        parallel: bool) -> List[Verdict]:
+    statements_xml = _reformat_statements_to_xml(statements)
+    logger.debug(f"statements_xml: {statements_xml}")
+
     prompt_template = read_template_from_file(
         PROMPT_INFER_ENTAILMENT_FROM_CONTEXT)
-    prompt_nli = PromptTemplate(template=prompt_template,
-                                input_variables=["context", "statements_xml"])
+    prompt_nli = PromptTemplate(
+        template=prompt_template,
+        input_variables=["context", "statements_xml"])
     chain_nli = prompt_nli | model | StrOutputParser()
 
-    num_entailed, num_total = 0, 0
-
+    entailments = []
     if parallel:
         tasks = []
         for ctx in context:
@@ -64,9 +69,7 @@ async def compute_faithfulness(question: str,
             verdicts = result.value["verdicts"]["verdict"]
             for verdict_dict in verdicts:
                 verdict = Verdict(**verdict_dict)
-                if verdict.infer == "1":
-                    num_entailed += 1
-                num_total += 1
+                entailments.append(verdict)
     else:
         for ctx in context:
             response = chain_nli.invoke({
@@ -78,12 +81,23 @@ async def compute_faithfulness(question: str,
             verdicts = result.value["verdicts"]["verdict"]
             for verdict_dict in verdicts:
                 verdict = Verdict(**verdict_dict)
-                if verdict.infer == "1":
-                    num_entailed += 1
-                num_total += 1
+                entailments.append(verdict)
 
+    return entailments
+
+
+async def compute_faithfulness(question: str,
+                               answer: str,
+                               context: List[str],
+                               model: BaseChatModel,
+                               logger,
+                               parallel: bool = True) -> float:
+    statements = _get_statements_from_answer(question, answer, model, logger)
+    entailments = await _get_entailments_from_context(
+        context, statements, model, logger, parallel)
+    num_entailed = sum([int(verdict.infer) for verdict in entailments])
+    num_total = len(entailments)
     logger.debug(f"num_entailed: {num_entailed}, num_total: {num_total}")
-
     try:
         faithfulness = num_entailed / num_total
     except ZeroDivisionError:

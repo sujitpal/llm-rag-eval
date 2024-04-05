@@ -3,7 +3,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
 from xml.sax.saxutils import escape
 
-from common_utils import read_template_from_file, parse_response
+from .prompt_utils import read_template_from_file, parse_response
 
 
 PROMPT_CLASSIFY_FACTS = "answer_correctness_1.txt"

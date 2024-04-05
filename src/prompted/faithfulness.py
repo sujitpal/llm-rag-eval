@@ -1,5 +1,6 @@
 import asyncio
 
+from itertools import chain
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
@@ -26,8 +27,9 @@ def _get_statements_from_answer(question: str,
                                 logger) -> List[str]:
     prompt_template = read_template_from_file(
         PROMPT_EXTRACT_STATEMENTS_FROM_ANSWER)
-    prompt_ans_to_stmt = PromptTemplate(template=prompt_template,
-                                        input_variables=["question", "answer"])
+    prompt_ans_to_stmt = PromptTemplate(
+        template=prompt_template,
+        input_variables=["question", "answer"])
     chain_ans_to_stmt = prompt_ans_to_stmt | model | StrOutputParser()
     response = chain_ans_to_stmt.invoke({
         "question": question,
@@ -43,7 +45,8 @@ async def _get_entailments_from_context(context: List[str],
                                         statements: List[str],
                                         model: BaseChatModel,
                                         logger,
-                                        parallel: bool) -> List[Verdict]:
+                                        parallel: bool
+                                        ) -> List[List[float]]:
     statements_xml = _reformat_statements_to_xml(statements)
     logger.debug(f"statements_xml: {statements_xml}")
 
@@ -67,9 +70,10 @@ async def _get_entailments_from_context(context: List[str],
             result = parse_response(response)
             logger.debug(f"entailment verdicts: {result}")
             verdicts = result.value["verdicts"]["verdict"]
-            for verdict_dict in verdicts:
-                verdict = Verdict(**verdict_dict)
-                entailments.append(verdict)
+            entailments.append([int(Verdict(**v).infer) for v in verdicts])
+            # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
+            # num_total = len(verdicts)
+            # entailments.append(num_entailed / num_total)
     else:
         for ctx in context:
             response = chain_nli.invoke({
@@ -79,10 +83,12 @@ async def _get_entailments_from_context(context: List[str],
             result = parse_response(response)
             logger.debug(f"entailment verdicts: {result}")
             verdicts = result.value["verdicts"]["verdict"]
-            for verdict_dict in verdicts:
-                verdict = Verdict(**verdict_dict)
-                entailments.append(verdict)
+            entailments.append([int(Verdict(**v).infer) for v in verdicts])
+            # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
+            # num_total = len(verdicts)
+            # entailments.append(num_entailed / num_total)
 
+    logger.debug(f"entailments: {entailments}")
     return entailments
 
 
@@ -93,13 +99,12 @@ async def compute_faithfulness(question: str,
                                logger,
                                parallel: bool = True) -> float:
     statements = _get_statements_from_answer(question, answer, model, logger)
-    entailments = await _get_entailments_from_context(
+    entailments_lol = await _get_entailments_from_context(
         context, statements, model, logger, parallel)
-    num_entailed = sum([int(verdict.infer) for verdict in entailments])
-    num_total = len(entailments)
-    logger.debug(f"num_entailed: {num_entailed}, num_total: {num_total}")
+    entailments = list(chain.from_iterable(entailments_lol))
+    
     try:
-        faithfulness = num_entailed / num_total
+        faithfulness = sum(entailments) / len(entailments)
     except ZeroDivisionError:
         faithfulness = 0.0
     return faithfulness

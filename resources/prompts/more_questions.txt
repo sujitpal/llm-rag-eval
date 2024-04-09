@@ -1,0 +1,26 @@
+Similar to how the question
+question: {question}
+
+is answered by
+answer: {answer}
+
+generate 3 new (question, answer) pairs specifically from the content in the following passages:
+
+{passages}
+
+Return these (question,answer) pairs in the following XML format:
+
+<result>
+    <pairs>
+        <question>question 1 text></question>
+        <answer>answer 1 text</answer>
+    </pairs>
+    <pairs>
+        <question>question 2 text></question>
+        <answer>answer 2 text</answer>
+    </pairs>
+    <pairs>
+        <question>question 3 text></question>
+        <answer>answer 3 text</answer>
+    </pairs>
+</result>

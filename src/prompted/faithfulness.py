@@ -71,9 +71,6 @@ async def _get_entailments_from_context(context: List[str],
             logger.debug(f"entailment verdicts: {result}")
             verdicts = result.value["verdicts"]["verdict"]
             entailments.append([int(Verdict(**v).infer) for v in verdicts])
-            # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
-            # num_total = len(verdicts)
-            # entailments.append(num_entailed / num_total)
     else:
         for ctx in context:
             response = chain_nli.invoke({

@@ -85,8 +85,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            if int(id) <= 2:
-                continue
+            # if int(id) <= 20:
+            #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]

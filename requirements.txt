@@ -1,10 +1,17 @@
+absl-py
+accelerate
 Jinja2
 dspy-ai
 dspy-ai[chromadb]
+evaluate
 google-generativeai
 langchain
 langchain-google-genai
 nltk
 pillow
 polars
+rouge-score
+scikit-learn
+tensorboardX
+transformers[torch]
 xmltodict

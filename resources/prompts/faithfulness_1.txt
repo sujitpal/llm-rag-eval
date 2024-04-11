@@ -1,4 +1,4 @@
-Create one or more statements from each sentence in the given answer.
+Create two or more statements from each sentence in the given answer.
 
 Here are some examples:
 

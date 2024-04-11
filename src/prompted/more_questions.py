@@ -16,25 +16,34 @@ PROMPT_MORE_QUESTIONS = "more_questions.txt"
 
 def compute_more_questions(question: str,
                                ideal_answer: str,
+                               multiplier: int,
                                model: BaseChatModel,
                                logger) -> list:
-    more_passages = dsp.retrieve(question, k=3)
+    more_passages = dsp.retrieve(question, k=multiplier)
+    esc_more_passages = [escape(x) for x in more_passages]
     prompt_template = read_template_from_file(PROMPT_MORE_QUESTIONS)
     prompt = PromptTemplate(template=prompt_template,
-                            input_variables=["question", "answer", "passages"])
+                            input_variables=["question", "answer", "multiplier", "passages"])
     chain = prompt | model | StrOutputParser()
     response = chain.invoke({
         "question": question,
         "answer": ideal_answer,
-        "passages": more_passages
+        "multiplier": multiplier,
+        "passages": esc_more_passages
     })
+    
+    # make list of dicts from XML output
+    # format per requirement
+    # ideal_answer is just the predicted_answer, as a workaround
+
     result = parse_response(response)
     
-    result_pairs = result.value["pairs"]
-    pairs = []
-    for _ in result_pairs:
-        pairs.append((_["question"],_["answer"]))
-    logger.debug("pairs: ", pairs)
-    # print(f"pairs: {pairs}")
+    result_tuples = result.value["tuples"]
+    result_list = []
+    for _ in result_tuples:
+        chunk = {"id": "1", "chunk_text": _["context"]}
+        r_dict = {"query": _["question"], "predicted_answer": _["answer"], "ideal_answer": _["answer"], "context": [chunk]}
+        result_list.append(r_dict)
+    logger.debug("result_list: ", result_list)
  
-    return pairs
+    return result_list

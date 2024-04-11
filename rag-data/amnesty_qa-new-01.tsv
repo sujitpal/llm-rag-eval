@@ -1,52 +1,38 @@
-
-query (id - 3)
-q: What action did Amnesty International urge its supporters to take in response to the killing of the Ogoni 9?a: Amnesty International urged its supporters to send appeals for the defenders' freedom to Nigerian authorities and later to send letters of outrage.
-q[0]: Who is the brother of executed Ogoni leader Ken Saro-Wiwa?a[0]: Monday Owens Wiwaq[1]: What organization did Zakoora and Tengpora Massacre lead to issue an appeal for urgent action?a[1]: Amnesty Internationalq[2]: What was the name of the military dictatorship that executed the Ogoni Nine?a[2]: General Sani Abacha
-query (id - 4)
-q: What are the recommendations made by Amnesty International to the Special Rapporteur on Human Rights Defenders?a: The recommendations made by Amnesty International to the Special Rapporteur on Human Rights Defenders include embedding a focus on child and young HRDs in future work, raising awareness about the differences and challenges they face, incorporating age disaggregated data in reports, and creating safe spaces for engagement.
-q[0]: Who is the current United Nations Special Rapporteur on the situation of human rights defenders?a[0]: Michel Forstq[1]: What is the mandate of the Special Rapporteur on Violence Against Women?a[1]: To investigate, monitor and recommend solutions to violence against womenq[2]: When was the mandate of the Special Rapporteur on Violence Against Women established?a[2]: 4 March 1994
-query (id - 5)
-q: Who are the target audience of the two books created by Amnesty International on child rights?a: The target audience of the two books created by Amnesty International on child rights are children and young people.
-q[0]: Who founded Amnesty International's Scotland office?a[0]: Ruth Adlerq[1]: What is the name of the poem featured in Amnesty International Denmark's 1979 book on Human Rights?a[1]: Ikke Bødlenq[2]: What organization is focused on human rights and has over 7 million members and supporters worldwide?a[2]: Amnesty International
-query (id - 6)
-q: Which right guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations?a: The right that guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations, is the right to know the truth.
-q[0]: What is the purpose of the guarantees of non-repetition?a[0]: The guarantees of non-repetition are a component of reparations that aim to prevent the recurrence of human rights violations.q[1]: What is the right to restitution?a[1]: The right to restitution is a victims' right that allows victims of crime to seek compensation for damages suffered.q[2]: What is the purpose of the protection of sources?a[2]: The protection of sources is a right that protects journalists from being compelled to reveal the identity of anonymous sources, ensuring the free flow of information in the public interest.
-query (id - 7)
-q: Who has the right to be fully informed about human rights violations, including the identities of the perpetrators and the fate of the victims?a: The victims of gross human rights violations and their families, as well as members of society generally, have the right to be fully informed about human rights violations, including the identities of the perpetrators and the fate of the victims.
-q[0]: What is the purpose of victimology?a[0]: Victimology is the study of victimization, including the psychological effects on victims, relationships between victims and offenders, the interactions between victims and the criminal justice system, and the connections between victims and other social groups and institutions.q[1]: What is the Crime Victims' Rights Act?a[1]: The Crime Victims' Rights Act is a United States law that enumerates the rights afforded to victims in federal criminal cases.q[2]: What are some of the rights afforded to victims under the Crime Victims' Rights Act?a[2]: The Crime Victims' Rights Act grants victims the following eight rights: the right to be informed about the criminal justice process, the right to be present at criminal justice proceedings, the right to be heard at criminal justice proceedings, the right to confer with the prosecutor, the right to restitution, the right to protection from the accused, the right to a speedy trial, and the right to be treated with fairness and respect.
-query (id - 8)
-q: When can individuals be found guilty under Article 207.3 of the Russian Criminal Code?a: Individuals can be found guilty under Article 207.3 of the Russian Criminal Code if their statements are contrary to the official position of the Russian authorities.
-q[0]: When was Article 58 of the Russian SFSR Penal Code put in force?a[0]: Article 58 of the Russian SFSR Penal Code was put in force on 25 February 1927.q[1]: What is the conventional term used in the Russian blogosphere and mass media for the controversial criminal case against Mrs. Antonina Martynova?a[1]: The conventional term used in the Russian blogosphere and mass media for the controversial criminal case against Mrs. Antonina Martynova is the Novgorod Case.q[2]: What are the counts of the criminal case in the Bolotnaya Square case?a[2]: The counts of the criminal case in the Bolotnaya Square case are alleged massive riot (article 212 of the Russian Criminal code) and alleged violence against police (article 318 of the Russian Criminal code).
-query (id - 9)
-q: When does the prosecution consider statements contrary to the official position as 'false' under Article 207.3?a: The prosecution considers statements contrary to the official position as 'false' under Article 207.3 when they are in opposition to the official position of the Russian authorities.
-q[0]: What is the common name for the United States federal crime laid out in Section 1001 of Title 18 of the United States Code?a[0]: Making false statementsq[1]: What is an exception to the protection of free speech under the First Amendment in United States constitutional law?a[1]: False statements of factq[2]: When does criminal culpability attach in the case of perjury?a[2]: When the declarant falsely asserts the truth of statements material to the outcome of the proceeding
-query (id - 10)
-q: What factors have contributed to the decline of independent civil society organizations in Nicaragua?a: The factors that have contributed to the decline of independent civil society organizations in Nicaragua include arrests and harassment of human rights defenders, restrictive NGO laws, violent repression of protests, closure of civil society organizations and community centers, expropriation of belongings and premises, criminalization of social organizing and mobilization, restrictions on freedom of expression, implementation of repressive laws, constant threats of arrest and detention, restrictions on social media, and the imposition of silence through violence and repression.
-q[0]: What was the youth organization of the Independent Liberal Party in Nicaragua?a[0]: Democratic Youth Front (FJD)q[1]: Who was the US-born adventurer who took over Nicaragua in 1856?a[1]: William Walkerq[2]: Which political coalition was formed in 1966 to challenge Anastasio Somoza Debayle's candidacy?a[2]: National Opposition Union (UNO)
-query (id - 11)
-q: What conditions designate wetlands as Ramsar sites?a: The conditions that designate wetlands as Ramsar sites are when they fulfill the criteria for identifying wetlands of international importance, as established under the Convention on Wetlands.
-q[0]: How many Ramsar sites are currently designated in the United States?a[0]: 38q[1]: What is the purpose of the Ramsar Convention?a[1]: To conserve and sustainably utilize wetlands, recognizing their ecological, economic, cultural, scientific, and recreational value.q[2]: When did the Ramsar Convention become effective in Poland?a[2]: 22 March 1978
-query (id - 12)
-q: Where was COP15 held in 2022?a: COP15 was held in Montreal, Canada in 2022.
-q[0]: What was the name of the rival conference held in Copenhagen during COP15 in 2009?a[0]: Copenhagen Climate Challengeq[1]: Who organized the "Train to Copenhagen" campaign?a[1]: The UN's 'Seal the Deal' campaignq[2]: What organization initiated the "World Wide Views on Global Warming" project?a[2]: The Danish Board of Technology
-query (id - 13)
-q: What is the purpose of the agreement known as 30x30?a: The purpose of the agreement known as 30x30 is to designate 30% of the world's land and sea masses as protected areas for biodiversity conservation by 2030.
-q[0]: What is the function of the GJB6 protein?a[0]: The GJB6 protein, also known as connexin 30 (Cx30), is a gap junction protein expressed in the inner ear and plays a role in hearing.q[1]: What was the purpose of the Dutch–Scandinavian Economic Pact?a[1]: The Dutch–Scandinavian Economic Pact aimed to coordinate tariff policies and promote trade among the Netherlands, Denmark, Norway, and Sweden in response to the economic crisis of the early 1930s.q[2]: What are the areas of interest for the Group of Thirty?a[2]: The Group of Thirty focuses on economic and financial issues, including the foreign exchange market, international capital markets, international financial institutions, central banks, and macroeconomic issues such as product and labor markets.
-query (id - 14)
-q: Who failed to explicitly recognize Indigenous Peoples' lands and territories as a distinct category of protected area at COP15?a: The States failed to explicitly recognize Indigenous Peoples' lands and territories as a distinct category of protected area at COP15.
-q[0]: What is the purpose of special rules for lands inhabited by indigenous peoples?a[0]: To protect indigenous land rights.q[1]: What is the name of the class of protected area used in Australia that is formed by agreement with Indigenous Australians?a[1]: Indigenous Protected Area.q[2]: How many native ethnicities are recognized by the Republic of Costa Rica?a[2]: Eight.
-query (id - 15)
-q: What are the consequences of criminalizing abortion for marginalized individuals?a: The consequences of criminalizing abortion for marginalized individuals include increased stigma, lack of information, and disinformation. This can have severe and irreversible effects on these individuals. Girls and young women may be forced to carry pregnancies resulting from sexual violence due to a lack of knowledge about their rights. Marginalized individuals, such as those living in poverty, historically discriminated against, Indigenous and Afro-descendent women, migrants, and refugees, are disproportionately affected by abortion criminalization. The criminalization of abortion is a major factor contributing to the high number of unsafe abortions, which leads to increased maternal mortality and morbidity. Access to health services is undermined, resulting in preventable maternal deaths and complications. Marginalized individuals are forced to resort to unsafe clandestine abortion methods, putting their lives and health at risk. In Nigeria, restrictive abortion laws make it difficult to access safe abortion care.
-q[0]: What is the Donohue-Levitt hypothesis?a[0]: The Donohue-Levitt hypothesis proposes that legal abortion reduces crime by preventing unwanted or unsupported children from being born, who are more likely to become criminals.q[1]: What is the "Roe effect"?a[1]: The "Roe effect" is a hypothesis that suggests that abortion rights supporters erode their own political base, leading to the eventual restriction or illegalization of abortion.q[2]: What is the subject of the documentary film "When Abortion Was Illegal: Untold Stories"?a[2]: The documentary film "When Abortion Was Illegal: Untold Stories" consists of first-person accounts of the physical, emotional, and legal consequences of having or providing an abortion when it was a criminal act.
-query (id - 16)
-q: What responsibilities should social media companies have in relation to ensuring access to accurate sexual and reproductive health information?a: Social media companies should have the responsibility to invest in human oversight of their content moderation systems to ensure equal access to accurate sexual and reproductive health information. They should also engage in human rights due diligence to address risks and abuses related to their business model.
-q[0]: What is the mission of the Irish Family Planning Association (IFPA)?a[0]: The IFPA is an Irish charity that works to enable people to make informed choices about sexuality and reproduction. They promote the right of all people to sexual and reproductive health information and dedicated, confidential, and affordable healthcare services.q[1]: How does Ma3looma address the lack of sexual and reproductive health (SRH) education among Egyptian youth?a[1]: Ma3looma uses various social media platforms and its own website to provide anonymous, accurate, and non-judgmental information about SRH to at-risk populations and Egyptian youth coming of age in a digital era. The information is managed and staffed by trained counselors from the Egyptian Family Health Service (EFHS).q[2]: What are the goals of Roots of Health in the Philippines?a[2]: Roots of Health aims to improve the reproductive, maternal, and sexual health of women, girls, and their communities in Puerto Princesa, Palawan. They provide scientifically accurate information on health, along with age-appropriate educational services to change health attitudes and behaviors. They also seek to reduce maternal mortality, HIV, and teenage pregnancy to help ensure continued education.
-query (id - 17)
-q: What role do social media companies play in protecting users' rights online, regardless of their language and political views?a: Social media companies play a role in protecting users' rights online, regardless of their language and political views, by investing in human oversight of content moderation systems, engaging in human rights due diligence, and educating users about security and privacy features.
-q[0]: What is the role of issue networks in influencing government policy?a[0]: Issue networks play a role in influencing government policy by uniting interest groups and individuals to promote a common cause or agenda, often through online resources such as blogs and social media.q[1]: How do social media and television broadcasting interact?a[1]: Social media and television broadcasting interact through online access to TV shows on various devices, sharing of video clips and comments on social media, and active viewer participation through online comments and hashtags.q[2]: What are the different forms that social media can take?a[2]: Social media can take various forms, including microblogging, forums, bookmarking sites, social networks, and wikis.
-query (id - 18)
-q: What labor abuses were documented by Amnesty International in Qatar and how do they relate to the kafala system?a: Amnesty International documented labor abuses in Qatar, including workers being permitted only one day off each month, threats of salary cuts for taking more rest time, failure to provide pay slips, and overcrowded and dirty living conditions. These labor abuses relate to the kafala system because the kafala system imposes tight restrictions on migrant workers' freedom of movement and ability to change jobs without their employer's permission. This system allows abusive employers to control their workforce by canceling residence permits, falsely reporting employees as absconding, and using non-compete clauses to prevent workers from changing jobs.
-q[0]: What is the kafala system and where is it used?a[0]: The kafala system is a system used to monitor migrant laborers, working primarily in the construction and domestic sectors, in Lebanon, Bahrain, Iraq, Jordan, Kuwait, Oman, Qatar, Saudi Arabia, and the UAE. The system requires all unskilled laborers to have an in-country sponsor, usually their employer, who is responsible for their visa and legal status.q[1]: What is Voiceless Victims and what has it been accused of?a[1]: Voiceless Victims is a fake non-profit organization based in Lille, France. It claims to raise awareness for migrant workers who are victims of human rights abuses in Qatar. However, it has been accused of spying on Amnesty International, Building and Wood Workers' International, and Anti-Slavery International by sending e-mails with spyware and malware to their staff.q[2]: What are some of the problems faced by migrant domestic workers in Lebanon?a[2]: Migrant domestic workers in Lebanon face many legal issues and violations to their basic human rights due to the ambiguity of the Kafala system. The government has been largely inactive and ineffective in implementing laws to protect them.
-query (id - 19)
-q: When did the government of Qatar start repealing restrictions on migrant workers?a: The government of Qatar started repealing restrictions on migrant workers between 2018 and 2020.
-q[0]: When did Turkish labor migration to Qatar begin?a[0]: Turkish labor migration to Qatar began in the mid-1970s.q[1]: What is the primary form of human trafficking in Qatar?a[1]: The primary form of human trafficking in Qatar is forced labor.q[2]: When was the Custody and Repatriation system in China abolished?a[2]: The Custody and Repatriation system in China was abolished in 2003.
+#QID	FAITHFULNESS
+20	1.000
+21	1.000
+22	1.000
+23	1.000
+24	1.000
+25	1.000
+26	1.000
+27	1.000
+28	1.000
+29	1.000
+30	1.000
+31	1.000
+32	1.000
+33	1.000
+34	1.000
+35	1.000
+36	1.000
+37	1.000
+38	1.000
+39	1.000
+40	0.500
+41	0.500
+42	1.000
+43	0.500
+44	1.000
+45	1.000
+46	0.500
+47	1.000
+48	1.000
+49	1.000
+50	1.000
+51	1.000
+52	1.000
+53	1.000
+54	1.000
+55	0.400
+56	1.000

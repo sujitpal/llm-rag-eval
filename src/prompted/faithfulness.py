@@ -35,8 +35,14 @@ def _get_statements_from_answer(question: str,
         "question": question,
         "answer": answer
     })
+    logger.debug(f"response: {response}")
     result = parse_response(response)
+    logger.debug(f"result (parsed response): {result}")
     statements = result.value["statements"]["statement"]
+    if not isinstance(statements, list):
+        statements = [statements]
+        logger.debug("statement made into a []")
+
     logger.debug(f"statements: {statements}")
     return statements
 
@@ -70,6 +76,11 @@ async def _get_entailments_from_context(context: List[str],
             result = parse_response(response)
             logger.debug(f"entailment verdicts: {result}")
             verdicts = result.value["verdicts"]["verdict"]
+            logger.debug(f"type(verdicts): {type(verdicts)}")
+            if not isinstance(verdicts, list):
+                verdicts = [verdicts]
+                logger.debug(f"made verdicts into []")
+
             entailments.append([int(Verdict(**v).infer) for v in verdicts])
             # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
             # num_total = len(verdicts)
@@ -83,6 +94,10 @@ async def _get_entailments_from_context(context: List[str],
             result = parse_response(response)
             logger.debug(f"entailment verdicts: {result}")
             verdicts = result.value["verdicts"]["verdict"]
+            if not isinstance(verdicts, list):
+                verdicts = [verdicts]
+                logger.debug(f"made verdicts into []")
+
             entailments.append([int(Verdict(**v).infer) for v in verdicts])
             # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
             # num_total = len(verdicts)

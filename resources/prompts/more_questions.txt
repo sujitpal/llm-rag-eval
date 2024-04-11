@@ -4,23 +4,27 @@ question: {question}
 is answered by
 answer: {answer}
 
-generate 3 new (question, answer) pairs specifically from the content in the following passages:
+generate {multiplier} new (question, answer, context) tuples specifically from the content in the following passages:
 
 {passages}
 
-Return these (question,answer) pairs in the following XML format:
+Return these (question, answer, context) tuples in the following XML format:
 
 <result>
-    <pairs>
+    <tuples>
         <question>question 1 text></question>
         <answer>answer 1 text</answer>
-    </pairs>
-    <pairs>
+        <context>passage 1 text</context>
+    </tuples>
+    <tuples>
         <question>question 2 text></question>
         <answer>answer 2 text</answer>
-    </pairs>
-    <pairs>
+        <context>passage 2 text</context>
+    </tuples>
+    <tuples>
         <question>question 3 text></question>
         <answer>answer 3 text</answer>
-    </pairs>
+        <context>passage 3 text</context>
+    </tuples>
+    ...
 </result>

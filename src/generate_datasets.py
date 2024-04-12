@@ -11,6 +11,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from prompted.faithfulness import (
     _get_statements_from_answer, _get_entailments_from_context
 )
+from prompted.answer_relevance import (
+    _flatten_context,
+    _generate_questions_from_answer_and_context,
+    _predict_noncommittal_from_questions
+)
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
@@ -67,7 +72,7 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            if int(id) <= 20:
+            if int(id) <= 43:
                 continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
@@ -90,6 +95,21 @@ async def runner():
                         "answer": answer,
                         "statements": statements,
                         "entailments": entailments
+                    }) + "\n")
+                case Metrics.ANSWER_RELEVANCE:
+                    context_flat = _flatten_context(context)
+                    gen_questions = _generate_questions_from_answer_and_context(
+                        context_flat, answer, 5, model, logger)
+                    qa_pairs = await _predict_noncommittal_from_questions(
+                        gen_questions, context_flat, run_parallel, model,
+                        logger)
+                    fout.write(json.dumps({
+                        "id": id,
+                        "question": question,
+                        "context": context,
+                        "answer": answer,
+                        "gen_questions": gen_questions,
+                        "non_commitals": [qap.noncommittal for qap in qa_pairs]
                     }) + "\n")
                 case _:
                     pass

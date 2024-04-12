@@ -29,18 +29,15 @@ def _cosine_similarity(query_vector, doc_vectors):
     return np.mean(sims)
 
 
-async def compute_answer_relevance(question: str,
-                                   context: List[str],
-                                   answer: str,
-                                   model: BaseChatModel,
-                                   encoder: Embeddings,
-                                   logger,
-                                   num_questions_to_generate: int = 5,
-                                   parallel: bool = True
-                                   ) -> float:
-    # reformat context
-    context_flat = " ".join([f"{i+1}. {chunk}" 
-                             for i, chunk in enumerate(context)])
+def _flatten_context(context: List[str]) -> str:
+    return " ".join([f"{i+1}. {chunk}" for i, chunk in enumerate(context)])
+
+
+def _generate_questions_from_answer_and_context(context_flat: str,
+                                                answer: str,
+                                                num_questions_to_generate: int,
+                                                model: BaseChatModel,
+                                                logger):
     # generate questions
     prompt_genq = read_template_from_file(PROMPT_GEN_QUESTIONS)
     prompt = PromptTemplate(template=prompt_genq,
@@ -56,7 +53,14 @@ async def compute_answer_relevance(question: str,
     result = parse_response(response)
     gen_questions = result.value["questions"]["question"]
     logger.debug(f"gen_questions: {gen_questions}")
+    return gen_questions
 
+
+async def _predict_noncommittal_from_questions(gen_questions: List[str],
+                                               context_flat: str,
+                                               parallel: bool,
+                                               model: BaseChatModel,
+                                               logger):
     # generate answers to generated questions based on context and
     # classify answers as committal or non-committal
     prompt_anc = read_template_from_file(PROMPT_CLASSIFY_NONCOMMITTAL)
@@ -70,7 +74,7 @@ async def compute_answer_relevance(question: str,
         for gen_question in gen_questions:
             tasks.append(chain_anc.ainvoke({
                 "question": gen_question,
-                "context": context
+                "context": context_flat
             }))
         responses = await asyncio.gather(*tasks)
         for response in responses:
@@ -81,13 +85,31 @@ async def compute_answer_relevance(question: str,
         for gen_question in gen_questions:
             response = chain_anc.invoke({
                 "question": gen_question,
-                "context": context
+                "context": context_flat
             })
             result = parse_response(response)
             qa_pair = ClassifiedQAPair(**result.value["qa_pair"])
             qa_pairs.append(qa_pair)
 
     logger.debug(f"qa_pairs: {qa_pairs}")
+    return qa_pairs
+
+
+async def compute_answer_relevance(question: str,
+                                   context: List[str],
+                                   answer: str,
+                                   model: BaseChatModel,
+                                   encoder: Embeddings,
+                                   logger,
+                                   num_questions_to_generate: int = 5,
+                                   parallel: bool = True
+                                   ) -> float:
+    # reformat context
+    context_flat = _flatten_context(context)
+    gen_questions = _generate_questions_from_answer_and_context(
+        context_flat, answer, num_questions_to_generate, model, logger)
+    qa_pairs = await _predict_noncommittal_from_questions(
+        gen_questions, context_flat, parallel, model, logger)
 
     # if all non-committal questions, then answer is not relevant
     if np.all([qa_pair.noncommittal == "1" for qa_pair in qa_pairs]):

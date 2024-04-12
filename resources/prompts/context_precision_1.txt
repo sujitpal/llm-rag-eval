@@ -9,7 +9,7 @@ answer: Albert Einstein born in 14 March 1879 was German-born theoretical physic
 output: <result>
     <verdict>
         <reason>The provided context was indeed useful in arriving at the given answer. The context includes key information about Albert Einstein's life and contributions, which are reflected in the answer.</reason>
-        <infer>1</verdict>
+        <infer>1</infer>
     </verdict>
 </result>
 

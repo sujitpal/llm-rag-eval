@@ -1,0 +1,30 @@
+Similar to how the question
+question: {question}
+
+is answered by
+answer: {answer}
+
+generate {multiplier} new (question, answer, context) tuples specifically from the content in the following passages:
+
+{passages}
+
+Return these (question, answer, context) tuples in the following XML format:
+
+<result>
+    <tuples>
+        <question>question 1 text></question>
+        <answer>answer 1 text</answer>
+        <context>passage 1 text</context>
+    </tuples>
+    <tuples>
+        <question>question 2 text></question>
+        <answer>answer 2 text</answer>
+        <context>passage 2 text</context>
+    </tuples>
+    <tuples>
+        <question>question 3 text></question>
+        <answer>answer 3 text</answer>
+        <context>passage 3 text</context>
+    </tuples>
+    ...
+</result>

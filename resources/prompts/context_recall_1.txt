@@ -1,4 +1,4 @@
-You are given a context and and answer. The answer is provided as a markdown list of
+You are given a context and an answer. The answer is provided as a markdown list of
 answer sentences.
 
 Analyze each answer sentence and classify if the sentence can be attributed to the 

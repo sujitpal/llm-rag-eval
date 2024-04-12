@@ -52,6 +52,8 @@ async def runner():
                         help="Run in parallel where possible (default false)")
     parser.add_argument("--cross-encoder", action="store_false",
                         help="Use cross-encoder similarity scoring (default true)")
+    parser.add_argument("--model-temp", type=float, required=False,
+                        help="The temperature of the model - between 0.0 and 1.0 (default 0.0)")
     parser.add_argument("--debug", action="store_true",
                         help="Turn debugging on (default: false)")
     args = parser.parse_args()
@@ -62,6 +64,9 @@ async def runner():
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
     run_in_parallel = args.parallel
     use_cross_encoder = args.cross_encoder
+    model_temp = args.model_temp
+    if model_temp is None or model_temp > 1.0 or model_temp < 0.0:
+        model_temp = 0.0
     debug = args.debug
 
     logger = logging.getLogger(__name__)
@@ -72,7 +77,7 @@ async def runner():
     model = ChatGoogleGenerativeAI(
         model="gemini-pro",
         api_key=os.environ["GOOGLE_API_KEY"],
-        temperature=0.0)
+        temperature=model_temp)
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
     os.makedirs(REPORTS_DIR, exist_ok=True)

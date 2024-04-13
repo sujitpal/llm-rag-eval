@@ -1,0 +1,44 @@
+{
+  "extractor": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "question": "Which right guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations?",
+        "answer": "The right that guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations, is the right to truth.",
+        "facts": "1. The right to truth is a fundamental human right recognized under international law.\n2. It includes the right to know about past human rights violations, including the identities of the perpetrators and the fate of the victims.\n3. It also includes the right to access information about the circumstances surrounding the violations."
+      },
+      {
+        "question": "When did the government of Qatar start repealing restrictions on migrant workers?",
+        "answer": "The government of Qatar started repealing restrictions on migrant workers in 2017.",
+        "context": "1. Between 2018 and 2020, the government took important steps towards tackling two central pillars of this system by repealing for most migrant workers the requirement to obtain from their employer an 'exit permit\u2019 to leave the country, and a \u2018no -objection certificate\u2019 (NOC) to change jobs.\n2. Other barriers to workers changing jobs freely have emerged over the last few years, limiting the impact of the reforms and maintaining the status quo.\n3. These include the unwritten \u2013 but often spoken \u2013 need for workers to secure \u201crelease papers\u201d, a resignation letter, or any equivalent of an NOC, from their current employers in order to successfully move jobs.",
+        "score": "0.0"
+      }
+    ],
+    "signature_instructions": " Given a question-answer pair, generate a list of 3-5 facts\n        from the answer\n    ",
+    "signature_prefix": "Facts:"
+  },
+  "scorer": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "context": "1. The Act raises serious questions about its compatibility with the right to truth.\n2. At an individual level, victims and their families possess an inalienable and non-derogable right to know the truth regarding the circumstances and reasons behind human rights violations, including the identities of the perpetrators and, in cases of death or enforced disappearance, the fate of the victims.\n3. In particular, the right to know the fate and whereabouts of \u2018disappeared\u2019 relatives has been confirmed in the jurisprudence of international and regional human rights bodies, as well as of national courts.",
+        "fact": "The right to truth is a fundamental human right recognized under international law.",
+        "score": "yes"
+      },
+      {
+        "question": "When did the government of Qatar start repealing restrictions on migrant workers?",
+        "answer": "The government of Qatar started repealing restrictions on migrant workers in 2017.",
+        "context": "1. Between 2018 and 2020, the government took important steps towards tackling two central pillars of this system by repealing for most migrant workers the requirement to obtain from their employer an 'exit permit\u2019 to leave the country, and a \u2018no -objection certificate\u2019 (NOC) to change jobs.\n2. Other barriers to workers changing jobs freely have emerged over the last few years, limiting the impact of the reforms and maintaining the status quo.\n3. These include the unwritten \u2013 but often spoken \u2013 need for workers to secure \u201crelease papers\u201d, a resignation letter, or any equivalent of an NOC, from their current employers in order to successfully move jobs.",
+        "score": "0.0"
+      }
+    ],
+    "signature_instructions": " Classify if fact can be inferred from context ",
+    "signature_prefix": "Score:"
+  }
+}

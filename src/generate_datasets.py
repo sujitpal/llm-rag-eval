@@ -32,13 +32,14 @@ class Metrics(Enum):
 async def generate_faithfulness_dataset(id: int,
                                         question: str,
                                         answer: str,
-                                        context: List[str],
+                                        context_str: str,
                                         run_parallel: bool,
                                         model,
                                         logger,
                                         fout):
     statements = faithfulness_p._get_statements_from_answer(
         question, answer, model, logger)
+    context = context_str.split("\n")
     entailments = await faithfulness_p._get_entailments_from_context(
         context, statements, model, logger,
         parallel=run_parallel)
@@ -58,24 +59,23 @@ async def generate_faithfulness_dataset(id: int,
 
 async def generate_answer_relevance_dataset(id: int,
                                             question: str,
-                                            context: List[str],
+                                            context_str: str,
                                             answer: str,
                                             run_parallel: bool,
                                             model,
                                             encoder,
                                             logger,
                                             fout):
-    context_flat = answer_relevance_p._flatten_context(context)
     gen_questions = answer_relevance_p._generate_questions_from_answer_and_context(
-        context_flat, answer, 5, model, logger)
+        context_str, answer, 5, model, logger)
     qa_pairs = await answer_relevance_p._predict_noncommittal_from_questions(
-        gen_questions, context_flat, run_parallel, model,
+        gen_questions, context_str, run_parallel, model,
         logger)
     score = answer_relevance_p._compute_answer_relevance(
         question, qa_pairs, encoder, logger)
     fout.write(json.dumps({
         "id": id,
-        "context": context,
+        "context": context_str.split("\n"),
         "answer": answer,
         "gen_questions": gen_questions,
         "non_commitals": [qap.noncommittal for qap in qa_pairs],
@@ -122,10 +122,11 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            # if int(id) < 19:
-            #     continue
+            if int(id) < 19:
+                continue
             question = record["query"]
-            context = [ctx["chunk_text"] for ctx in record["context"]]
+            # context = [ctx["chunk_text"] for ctx in record["context"]]
+            context_str = record["context"][0]["chunk_text"][0]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
 
@@ -134,11 +135,11 @@ async def runner():
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     await generate_faithfulness_dataset(
-                        id, question, answer, context, run_parallel,
+                        id, question, answer, context_str, run_parallel,
                         model, logger, fout)
                 case Metrics.ANSWER_RELEVANCE:
                     await generate_answer_relevance_dataset(
-                        id, question, context, answer, run_parallel,
+                        id, question, context_str, answer, run_parallel,
                         model, encoder, logger, fout)
                 case _:
                     pass

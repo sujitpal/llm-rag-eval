@@ -93,7 +93,7 @@ async def runner():
             # if int(id) <= 20:
             #     continue
             question = record["query"]
-            context = [ctx["chunk_text"] for ctx in record["context"]]
+            context = record["context"][0]["chunk_text"][0].split("\n")
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
 

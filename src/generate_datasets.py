@@ -6,21 +6,16 @@ import os
 
 from dotenv import load_dotenv, find_dotenv
 from enum import Enum
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import (
+    ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+)
+from typing import List
 
-from prompted.faithfulness import (
-    _get_statements_from_answer, _get_entailments_from_context
-)
-from prompted.answer_relevance import (
-    _flatten_context,
-    _generate_questions_from_answer_and_context,
-    _predict_noncommittal_from_questions
-)
+import prompted.faithfulness as faithfulness_p
+import prompted.answer_relevance as answer_relevance_p
+
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
-DATA_DIR = "../data"
-EXAMPLES_DIR = os.path.join(DATA_DIR, "examples")
 
 
 class Metrics(Enum):
@@ -32,6 +27,60 @@ class Metrics(Enum):
     CONTEXT_RECALL = "context_recall"
     ANSWER_SIMILARITY = "answer_similarity"
     ANSWER_CORRECTNESS = "answer_correctness"
+
+
+async def generate_faithfulness_dataset(id: int,
+                                        question: str,
+                                        answer: str,
+                                        context: List[str],
+                                        run_parallel: bool,
+                                        model,
+                                        logger,
+                                        fout):
+    statements = faithfulness_p._get_statements_from_answer(
+        question, answer, model, logger)
+    entailments = await faithfulness_p._get_entailments_from_context(
+        context, statements, model, logger,
+        parallel=run_parallel)
+    score = await faithfulness_p.compute_faithfulness(
+        question, answer, context, model, logger,
+        parallel=run_parallel)
+    fout.write(json.dumps({
+        "id": id,
+        "question": question,
+        "context": context,
+        "answer": answer,
+        "statements": statements,
+        "entailments": entailments,
+        "score": score
+    }) + "\n")
+
+
+async def generate_answer_relevance_dataset(id: int,
+                                            question: str,
+                                            context: List[str],
+                                            answer: str,
+                                            run_parallel: bool,
+                                            model,
+                                            encoder,
+                                            logger,
+                                            fout):
+    context_flat = answer_relevance_p._flatten_context(context)
+    gen_questions = answer_relevance_p._generate_questions_from_answer_and_context(
+        context_flat, answer, 5, model, logger)
+    qa_pairs = await answer_relevance_p._predict_noncommittal_from_questions(
+        gen_questions, context_flat, run_parallel, model,
+        logger)
+    score = answer_relevance_p._compute_answer_relevance(
+        question, qa_pairs, encoder, logger)
+    fout.write(json.dumps({
+        "id": id,
+        "context": context,
+        "answer": answer,
+        "gen_questions": gen_questions,
+        "non_commitals": [qap.noncommittal for qap in qa_pairs],
+        "score": score
+    }) + "\n")
 
 
 async def runner():
@@ -64,6 +113,7 @@ async def runner():
         model="gemini-pro",
         api_key=os.environ["GOOGLE_API_KEY"],
         temperature=0.0)
+    encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
     os.makedirs(args.output, exist_ok=True)
 
@@ -72,8 +122,8 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            if int(id) <= 43:
-                continue
+            # if int(id) < 19:
+            #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
@@ -83,34 +133,13 @@ async def runner():
 
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
-                    statements = _get_statements_from_answer(
-                        question, answer, model, logger)
-                    entailments = await _get_entailments_from_context(
-                        context, statements, model, logger,
-                        parallel=run_parallel)
-                    fout.write(json.dumps({
-                        "id": id,
-                        "question": question,
-                        "context": context,
-                        "answer": answer,
-                        "statements": statements,
-                        "entailments": entailments
-                    }) + "\n")
+                    await generate_faithfulness_dataset(
+                        id, question, answer, context, run_parallel,
+                        model, logger, fout)
                 case Metrics.ANSWER_RELEVANCE:
-                    context_flat = _flatten_context(context)
-                    gen_questions = _generate_questions_from_answer_and_context(
-                        context_flat, answer, 5, model, logger)
-                    qa_pairs = await _predict_noncommittal_from_questions(
-                        gen_questions, context_flat, run_parallel, model,
-                        logger)
-                    fout.write(json.dumps({
-                        "id": id,
-                        "question": question,
-                        "context": context,
-                        "answer": answer,
-                        "gen_questions": gen_questions,
-                        "non_commitals": [qap.noncommittal for qap in qa_pairs]
-                    }) + "\n")
+                    await generate_answer_relevance_dataset(
+                        id, question, context, answer, run_parallel,
+                        model, encoder, logger, fout)
                 case _:
                     pass
 

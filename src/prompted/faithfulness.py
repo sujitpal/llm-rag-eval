@@ -96,12 +96,18 @@ async def _get_entailments_from_context(context: List[str],
                 logger.debug(f"made verdicts into []")
 
             entailments.append([int(Verdict(**v).infer) for v in verdicts])
-            # num_entailed = sum([int(verdict["infer"]) for verdict in verdicts])
-            # num_total = len(verdicts)
-            # entailments.append(num_entailed / num_total)
 
     logger.debug(f"entailments: {entailments}")
     return entailments
+
+
+def _compute_faithfulness(entailments_lol: List[List[float]]) -> float:
+    entailments = list(chain.from_iterable(entailments_lol))
+    try:
+        faithfulness = sum(entailments) / len(entailments)
+    except ZeroDivisionError:
+        faithfulness = 0.0
+    return faithfulness
 
 
 async def compute_faithfulness(question: str,
@@ -113,10 +119,5 @@ async def compute_faithfulness(question: str,
     statements = _get_statements_from_answer(question, answer, model, logger)
     entailments_lol = await _get_entailments_from_context(
         context, statements, model, logger, parallel)
-    entailments = list(chain.from_iterable(entailments_lol))
-    
-    try:
-        faithfulness = sum(entailments) / len(entailments)
-    except ZeroDivisionError:
-        faithfulness = 0.0
+    faithfulness = _compute_faithfulness(entailments_lol)
     return faithfulness

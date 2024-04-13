@@ -95,6 +95,24 @@ async def _predict_noncommittal_from_questions(gen_questions: List[str],
     return qa_pairs
 
 
+def _compute_answer_relevance(question: str,
+                              qa_pairs: List[ClassifiedQAPair],
+                              encoder: Embeddings,
+                              logger):
+    # if all non-committal questions, then answer is not relevant
+    if np.all([qa_pair.noncommittal == "1" for qa_pair in qa_pairs]):
+        logger.warning("cannot compute similarity, generated questions "
+                       "are all non-committal")
+        return 0.0
+    else:
+        questions = [question]
+        questions.extend([qa_pair.question for qa_pair in qa_pairs])
+        embeddings = encoder.embed_documents(questions)
+        E = np.array(embeddings)
+        source, target = E[0, :], E[1:, :]
+        return _cosine_similarity(source, target)
+
+
 async def compute_answer_relevance(question: str,
                                    context: List[str],
                                    answer: str,
@@ -110,16 +128,6 @@ async def compute_answer_relevance(question: str,
         context_flat, answer, num_questions_to_generate, model, logger)
     qa_pairs = await _predict_noncommittal_from_questions(
         gen_questions, context_flat, parallel, model, logger)
-
-    # if all non-committal questions, then answer is not relevant
-    if np.all([qa_pair.noncommittal == "1" for qa_pair in qa_pairs]):
-        logger.warning("cannot compute similarity, generated questions "
-                       "are all non-committal")
-        return 0.0
-    else:
-        questions = [question]
-        questions.extend([qa_pair.question for qa_pair in qa_pairs])
-        embeddings = encoder.embed_documents(questions)
-        E = np.array(embeddings)
-        source, target = E[0, :], E[1:, :]
-        return _cosine_similarity(source, target)
+    answer_relevance = _compute_answer_relevance(
+        question, qa_pairs, encoder, logger)
+    return answer_relevance

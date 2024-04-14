@@ -75,6 +75,7 @@ async def generate_answer_relevance_dataset(id: int,
         question, qa_pairs, encoder, logger)
     fout.write(json.dumps({
         "id": id,
+        "question": question,
         "context": context_str.split("\n"),
         "answer": answer,
         "gen_questions": gen_questions,
@@ -125,7 +126,6 @@ async def runner():
             if int(id) < 19:
                 continue
             question = record["query"]
-            # context = [ctx["chunk_text"] for ctx in record["context"]]
             context_str = record["context"][0]["chunk_text"][0]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]

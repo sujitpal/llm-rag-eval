@@ -112,6 +112,7 @@ def optimize_prompt():
         for idx, prog in enumerate(ensemble):
             config_path = os.path.join(
                 CONFIGS_DIR, f"faithfulness-{idx}.json")
+            config_paths.append(config_path)
             prog.save(config_path)
 
         print("--- evaluation ---")
@@ -130,8 +131,7 @@ def optimize_prompt():
 def compute_faithfulness(question: str,
                          answer: str,
                          context: str,
-                         prompts_dict,
-                         model):
+                         prompts_dict):
     try:
         faithfulness_opt = prompts_dict["faithfulness"]
     except KeyError:

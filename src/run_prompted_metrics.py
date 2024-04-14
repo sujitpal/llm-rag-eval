@@ -44,9 +44,9 @@ async def runner():
                         choices=sorted([m.value for m in Metrics]),
                         required=True,
                         help="The metric to compute")
-    parser.add_argument("--input-jsonl", type=str, required=True,
+    parser.add_argument("--input", type=str, required=True,
                         help="Full path to evaluation data in JSONL format")
-    parser.add_argument("--output-tsv", type=str, required=False,
+    parser.add_argument("--output", type=str, required=False,
                         help="Full path to output TSV file")
     parser.add_argument("--parallel", action="store_true",
                         help="Run in parallel where possible (default false)")
@@ -58,8 +58,8 @@ async def runner():
                         help="Turn debugging on (default: false)")
     args = parser.parse_args()
     metric = args.metric
-    input_fp = args.input_jsonl
-    output_fp = args.output_tsv
+    input_fp = args.input
+    output_fp = args.output
     if output_fp is None:
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
     run_in_parallel = args.parallel

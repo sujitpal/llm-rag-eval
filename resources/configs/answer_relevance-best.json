@@ -1,0 +1,50 @@
+{
+  "question_generator": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "answer": "Everyone has the right to be fully informed about human rights violations, including the identities of the perpetrators and the fate of the victims. This right is recognized by various international human rights instruments, such as the Universal Declaration of Human Rights and the International Covenant on Civil and Political Rights.\n\nThe victims of human rights violations and their families have a particular right to know the truth about what happened to them. This includes knowing the identities of the perpetrators and the fate of the victims, such as whether they are alive or dead, and if dead, the circumstances of their death.\n\nFurthermore, society as a whole has a right to be informed about human rights violations. This is essential for holding perpetrators accountable, preventing future abuses, and ensuring justice and reparations for the victims. Access to information about human rights violations also allows for public scrutiny and debate, which are crucial for building a culture of human rights and promoting transparency and accountability.\n\nJournalists, human rights defenders, and civil society organizations play a vital role in investigating and reporting on human rights violations. They have the right to access information, conduct independent investigations, and disseminate their findings to the public. Governments have a responsibility to protect and facilitate these activities, ensuring that individuals and organizations can operate freely and without fear of reprisals.\n\nIn summary, the right to be fully informed about human rights violations, including the identities of the perpetrators and the fate of the victims, belongs to everyone. It is a fundamental aspect of promoting human rights, accountability, and justice.",
+        "context": "1. The victims of gross human rights violations and their families, as well as members of society generally, have the right to know the whole truth about past human rights violations.\n2. The right to truth is engaged by the violation of the rights to access to justice, remedy, and information.\n3. Victims and their families possess an inalienable and non-derogable right to know the truth regarding the circumstances and reasons behind human rights violations, including the identities of the perpetrators and the fate of the victims.\n4. The right to know the fate and whereabouts of 'disappeared' relatives has been confirmed in the jurisprudence of international and regional human rights bodies, as well as of national courts.",
+        "gen_questions": "1. What are the key provisions of international human rights instruments regarding the right to information about human rights violations?\n2. How does the right to truth contribute to holding perpetrators accountable and preventing future abuses?\n3. What is the role of journalists and civil society organizations in promoting the right to information about human rights violations?\n4. How does the right to know the fate and whereabouts of disappeared relatives relate to the right to truth?\n5. What are the responsibilities of governments in ensuring access to information about human rights violations?"
+      },
+      {
+        "augmented": true,
+        "answer": "The purpose of the agreement known as 30x30 is to conserve and protect 30% of the planet's land and oceans by the year 2030. This agreement aims to address the global biodiversity crisis and the impacts of climate change by preserving and restoring ecosystems, promoting sustainable land and ocean management practices, and safeguarding the habitats of numerous plant and animal species. The goal is to ensure the long-term health and resilience of the planet's natural resources and to support the well-being of both human and non-human communities.",
+        "context": "1. These include the agreement known as 30x30, adopted at the UN Conference on Biological Diversity (COP15) held in Montreal, Canada, in late 2022, which commits Parties to designate 30% of the world's land and sea masses as protected areas for biodiversity conservation by 2030.\n2. Protecting and restoring these ecosystems is one of the most efficient, equitable and cost-effective mechanisms to capture and store carbon without compromising human rights.\n3. However, the focus of the agreement should not be limited to the amount of area it covers, but rather to how it is managed, who selects the areas, and what biodiversity exists in them.\n4. Indigenous Peoples and local communities have a key role to play here.\n5. Unfortunately, at COP15, States failed to explicitly recognize Indigenous Peoples' lands and territories as a distinct category of protected area, and this threatens their rights.",
+        "gen_questions": "1. What is the goal of the 30x30 agreement?\n2. What percentage of the planet's land and oceans does the 30x30 agreement aim to protect?\n3. What are the benefits of conserving and protecting 30% of the planet's land and oceans?\n4. What is the role of Indigenous Peoples and local communities in the 30x30 agreement?\n5. What are some of the challenges associated with implementing the 30x30 agreement?"
+      }
+    ],
+    "signature_instructions": " Given the answer and context, generate 3 to 5 questions that can be \n        answered by the answer. ",
+    "signature_prefix": "Gen Questions:"
+  },
+  "answer_classifier": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "question": "What are the key provisions of international human rights instruments regarding the right to information about human rights violations?",
+        "context": "1. The victims of gross human rights violations and their families, as well as members of society generally, have the right to know the whole truth about past human rights violations.\n2. The right to truth is engaged by the violation of the rights to access to justice, remedy, and information.\n3. Victims and their families possess an inalienable and non-derogable right to know the truth regarding the circumstances and reasons behind human rights violations, including the identities of the perpetrators and the fate of the victims.\n4. The right to know the fate and whereabouts of 'disappeared' relatives has been confirmed in the jurisprudence of international and regional human rights bodies, as well as of national courts.",
+        "rationale": "produce the noncommital. We first need to identify the key provisions of international human rights instruments regarding the right to information about human rights violations. These provisions can be found in various international human rights instruments, including the Universal Declaration of Human Rights, the International Covenant on Civil and Political Rights, and the Convention against Torture and Other Cruel, Inhuman or Degrading Treatment or Punishment. These instruments set out the right to information about human rights violations, as well as the obligations of states to provide such information.",
+        "answer": "The key provisions of international human rights instruments regarding the right to information about human rights violations include the right to know the truth about past human rights violations, the right to access to justice, remedy, and information, and the right to know the fate and whereabouts of 'disappeared' relatives.",
+        "noncommital": "no"
+      },
+      {
+        "augmented": true,
+        "question": "How does the right to truth contribute to holding perpetrators accountable and preventing future abuses?",
+        "context": "1. The victims of gross human rights violations and their families, as well as members of society generally, have the right to know the whole truth about past human rights violations.\n2. The right to truth is engaged by the violation of the rights to access to justice, remedy, and information.\n3. Victims and their families possess an inalienable and non-derogable right to know the truth regarding the circumstances and reasons behind human rights violations, including the identities of the perpetrators and the fate of the victims.\n4. The right to know the fate and whereabouts of 'disappeared' relatives has been confirmed in the jurisprudence of international and regional human rights bodies, as well as of national courts.",
+        "rationale": "produce the noncommital. We first need to understand the concept of the right to truth. The right to truth is the right of victims of human rights violations and their families to know the whole truth about past human rights violations. This right is engaged by the violation of the rights to access to justice, remedy, and information. Victims and their families possess an inalienable and non-derogable right to know the truth regarding the circumstances and reasons behind human rights violations, including the identities of the perpetrators and the fate of the victims. The right to know the fate and whereabouts of 'disappeared' relatives has been confirmed in the jurisprudence of international and regional human rights bodies, as well as of national courts.",
+        "answer": "The right to truth contributes to holding perpetrators accountable and preventing future abuses by providing victims and their families with the information they need to seek justice and to prevent similar violations from happening again.",
+        "noncommital": "no"
+      }
+    ],
+    "signature_instructions": " Given a question and its context, use only the context to generate\n        an answer, and classify if the answer is commital or noncommital.\n    ",
+    "signature_prefix": "Noncommital:",
+    "extended_signature_instructions": " Given a question and its context, use only the context to generate\n        an answer, and classify if the answer is commital or noncommital.\n    ",
+    "extended_signature_prefix": "Noncommital:"
+  }
+}

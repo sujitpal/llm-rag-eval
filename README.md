@@ -34,7 +34,7 @@ TBD
 
 TBD
 
-## Running RAGAS metrics
+## Running Prompted RAGAS metrics
 
 The following RAGAS metrics have been (re-)implemented in this project (because
 I had trouble making them work as-is, and because they are conceptually quite 
@@ -55,21 +55,21 @@ The metrics described above can be run against your dataset by calling the `run_
 $ python3 run_prompted_metrics.py --help
 usage: run_prompted_metrics.py [-h] --metric
                                {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
-                               --input-jsonl INPUT_JSONL [--output-tsv OUTPUT_TSV] [--parallel] [--cross-encoder]
+                               --input INPUT_JSONL [--output OUTPUT_TSV] [--parallel] [--cross-encoder]
 
 options:
   -h, --help            show this help message and exit
   --metric {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
                         The metric to compute
-  --input-jsonl INPUT_JSONL
+  --input INPUT_JSONL
                         Full path to evaluation data in JSONL format
-  --output-tsv OUTPUT_TSV
+  --output OUTPUT_TSV
                         Full path to output TSV file
   --parallel            Run in parallel where possible (default false)
   --cross-encoder       Use cross-encoder similarity scoring (default false)
 ```
 
-Ideally, we want to generate metrics from a running RAG pipeline, but in order to simplify the development process, we have isolate the evaluation functionality, feeding it the input it needs via a JSON-L file. Each line of the JSON-L file represents a single RAG transaction. The required fields are as follows:
+Ideally, we want to generate metrics from a running RAG pipeline, but in order to simplify the development process, we have isolate the evaluation functionality, feeding it the input it needs via a JSON-L file. Each line of the JSON-L file represents a single RAG transaction. The required fields are as follows.
 
 ```
 {
@@ -86,4 +86,47 @@ Ideally, we want to generate metrics from a running RAG pipeline, but in order t
     "ideal_answer": {ground_truth: str},
     "predicted_answer": {answer: str}
 }
+```
+
+We have used the [AmnestyQA](https://huggingface.co/datasets/explodinggradients/amnesty_qa) dataset on HuggingFace as our reference dataset. You can find a copy of that data in the format described above.
+
+## Running Learned RAGAS metrics
+
+We have used DSPy to optimize our prompts for AmnestyQA dataset. At a very high level, this involves using random subsets of the training data (in our case outputs from our prompted RAG metrics) and finding the best subset of examples that produce the most optimized prompt.
+
+The DSPy implementations look for the optimized configuration in `resource/configs`. If it doesn't find it, then it looks for the dataset to allow it to optimize itself first. We have provided configurations for RAGAS metrics prompts optimized for AmnestyQA, but you probably need to generate optimized versions for your own dataset. To do so, you need to run the `generate_datasets.py` script, which will extract data from running the RAGAS prompts against the LLM and write it out as a JSON file into `data/dspy-datasets` (that's where the DSPy fine-tuning code expects to find it). The command to generate a dataset to fine-tune a DSPy prompt for a particular metric is shown below:
+
+```
+$ python3 generate_datasets.py --help
+usage: generate_datasets.py [-h] --metric
+                            {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
+                            --input INPUT --output OUTPUT [--parallel] [--debug]
+
+options:
+  -h, --help            show this help message and exit
+  --metric {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
+                        The metric to generate datasets for
+  --input INPUT         Full path to input JSONL file
+  --output OUTPUT       Full path to output directory
+  --parallel            Run in parallel where possible (default false)
+  --debug               Turn debugging on (default: false)
+```
+
+To re-run the optimization locally, remove the configuration file for the metric from the `resources/config` directory. The next time you run `run_learned_metrics.py` it will re-optimize (this is a fairly lengthy process but doesn't require GPU). Leave the config file alone to re-use the prompt optimized for AmnestyQA.
+
+```
+$ python3 run_learned_metrics.py --help
+usage: run_learned_metrics.py [-h] --metric
+                              {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
+                              --input INPUT [--output OUTPUT] [--cross-encoder] [--model-temp MODEL_TEMP]
+
+options:
+  -h, --help            show this help message and exit
+  --metric {answer_correctness,answer_relevance,answer_similarity,context_precision,context_recall,context_relevance,context_utilization,faithfulness}
+                        The metric to compute
+  --input INPUT         Full path to evaluation data in JSONL format
+  --output OUTPUT       Full path to output TSV file
+  --cross-encoder       Use cross-encoder similarity scoring (default true)
+  --model-temp MODEL_TEMP
+                        The temperature of the model - between 0.0 and 1.0 (default 0.0)
 ```

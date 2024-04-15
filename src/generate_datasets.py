@@ -13,6 +13,7 @@ from typing import List
 
 import prompted.faithfulness as faithfulness_p
 import prompted.answer_relevance as answer_relevance_p
+import prompted.context_precision as context_precision_p
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -84,6 +85,28 @@ async def generate_answer_relevance_dataset(id: int,
     }) + "\n")
 
 
+async def generate_context_precision_dataset(id: int,
+                                             question: str,
+                                             answer: str,
+                                             context_str: str,
+                                             run_parallel: bool,
+                                             model,
+                                             logger,
+                                             fout):
+    cnntext = context_str.split("\n")
+    precs = await context_precision_p._compute_usefulness_scores(
+        question, cnntext, answer, run_parallel, model, logger)
+    score = context_precision_p._compute_content_precision(precs)
+    fout.write(json.dumps({
+        "id": id,
+        "question": question,
+        "context": cnntext,
+        "answer": answer,
+        "precision": precs,
+        "score": score
+    }) + "\n")
+
+
 async def runner():
 
     parser = argparse.ArgumentParser()
@@ -141,6 +164,10 @@ async def runner():
                     await generate_answer_relevance_dataset(
                         id, question, context_str, answer, run_parallel,
                         model, encoder, logger, fout)
+                case Metrics.CONTEXT_PRECISION:
+                    await generate_context_precision_dataset(
+                        id, question, answer, context_str, run_parallel,
+                        model, logger, fout)
                 case _:
                     pass
 

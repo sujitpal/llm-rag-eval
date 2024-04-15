@@ -1,10 +1,11 @@
 import asyncio
 import nltk
 
+from itertools import chain
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain.prompts import PromptTemplate
-from typing import List, Tuple
+from typing import List
 from xml.sax.saxutils import escape
 
 from .prompt_utils import (
@@ -16,8 +17,8 @@ PROMPT_CLASSIFY_ATTRIB = "context_recall_1.txt"
 
 
 def _convert_answer_to_markdown_list(answer: str,
-                                     max_sents: int = 10
-                                     ) -> Tuple[int, str]:
+                                     logger,
+                                     max_sents: int = 10) -> str:
     answer_sents = []
     for sent in nltk.sent_tokenize(answer):
         sent = escape(sent)
@@ -27,15 +28,15 @@ def _convert_answer_to_markdown_list(answer: str,
     # care of lines that are already in the list format before sent_tokenize
     answer_sents = answer_markdown.split("\n- ")[:max_sents]
     answer_markdown = "\n- ".join(answer_sents)
-    return len(answer_sents), answer_markdown
+    logger.debug(f"answer_md ({len(answer_sents)} sentences): {answer_markdown}")
+    return answer_markdown
 
 
-async def compute_context_recall(context: List[str],
-                                 answer: str,
-                                 model: BaseChatModel,
-                                 logger,
-                                 parallel: bool = True) -> float:
-
+async def _classify_ans_sents_attributable_to_context(answer_md: str,
+                                                      context: List[str],
+                                                      parallel: bool,
+                                                      model,
+                                                      logger) -> List[int]:
     prompt_template = read_template_from_file(PROMPT_CLASSIFY_ATTRIB)
     prompt = PromptTemplate(
         template=prompt_template,
@@ -43,10 +44,7 @@ async def compute_context_recall(context: List[str],
     )
     chain = prompt | model | StrOutputParser()
 
-    num_ans_sents, answer_md = _convert_answer_to_markdown_list(answer)
-    logger.debug(f"answer_md ({num_ans_sents} sentences): {answer_md}")
-
-    all_verdicts = []
+    inferences = []
     if parallel:
         tasks = []
         for ctx in context:
@@ -58,7 +56,7 @@ async def compute_context_recall(context: List[str],
         for response in responses:
             result = parse_response(response)
             verdicts = parse_verdicts_from_result(result)
-            all_verdicts.extend(verdicts)
+            inferences.append([int(verdict.infer) for verdict in verdicts])
     else:
         for ctx in context:
             response = chain.invoke({
@@ -67,13 +65,28 @@ async def compute_context_recall(context: List[str],
             })
             result = parse_response(response)
             verdicts = parse_verdicts_from_result(result)
-            all_verdicts.extend(verdicts)
+            inferences.append([int(verdict.infer) for verdict in verdicts])
     
-    logger.debug(f"all verdicts: {all_verdicts}")
+    logger.debug(f"inferences: {inferences}")
+    return inferences
 
-    num_attributable = sum([int(verdict.infer) for verdict in all_verdicts])
-    num_denom = len(context) * num_ans_sents
-    if num_denom == 0:
-        return 0.0
-    recall = num_attributable / num_denom
-    return recall
+
+def _compute_context_recall_score(inferences: List[int]) -> float:
+    inferences_f = list(chain(*inferences))
+    score = 0.0
+    if len(inferences_f) > 0:
+        score = sum(inferences_f) / len(inferences_f)
+    return score
+
+
+async def compute_context_recall(context: List[str],
+                                 answer: str,
+                                 model: BaseChatModel,
+                                 logger,
+                                 parallel: bool = True) -> float:
+
+    answer_md = _convert_answer_to_markdown_list(answer, logger)
+    inferences = _classify_ans_sents_attributable_to_context(
+        answer_md, context, parallel, model, logger)
+    score = _compute_context_recall_score(inferences)
+    return score

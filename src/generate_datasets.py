@@ -14,6 +14,7 @@ import prompted.faithfulness as faithfulness_p
 import prompted.answer_relevance as answer_relevance_p
 import prompted.context_precision as context_precision_p
 import prompted.context_relevance as context_relevance_p
+import prompted.context_recall as context_recall_p
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -67,8 +68,9 @@ async def generate_answer_relevance_dataset(id: int,
                                             encoder,
                                             logger,
                                             fout):
-    gen_questions = answer_relevance_p._generate_questions_from_answer_and_context(
-        context_str, answer, 5, model, logger)
+    gen_questions = \
+        answer_relevance_p._generate_questions_from_answer_and_context(
+            context_str, answer, 5, model, logger)
     qa_pairs = await answer_relevance_p._predict_noncommittal_from_questions(
         gen_questions, context_str, run_parallel, model,
         logger)
@@ -134,6 +136,30 @@ async def generate_context_relevance_dataset(id: int,
     }) + "\n")
 
 
+async def generate_context_recall_dataset(id: int,
+                                          context_str: str,
+                                          answer: str,
+                                          run_parallel: bool,
+                                          model,
+                                          logger,
+                                          fout):
+    context = context_str.split("\n")
+    answer_md = context_recall_p._convert_answer_to_markdown_list(
+        answer, logger)
+    inferences = await \
+        context_recall_p._classify_ans_sents_attributable_to_context(
+            answer_md, context, run_parallel, model, logger)
+    score = context_recall_p._compute_context_recall_score(inferences)
+    fout.write(json.dumps({
+        "id": id,
+        "context": context,
+        "answer_md": answer_md,
+        "answer": answer,
+        "inferences": inferences,
+        "score": score
+    }) + "\n")
+
+
 async def runner():
 
     parser = argparse.ArgumentParser()
@@ -173,8 +199,8 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            if int(id) < 16:
-                continue
+            # if int(id) < 16:
+            #     continue
             question = record["query"]
             context_str = record["context"][0]["chunk_text"][0]
             answer = record["predicted_answer"]
@@ -198,6 +224,10 @@ async def runner():
                 case Metrics.CONTEXT_RELEVANCE:
                     await generate_context_relevance_dataset(
                         id, question, context_str, run_parallel, model,
+                        logger, fout)
+                case Metrics.CONTEXT_RECALL:
+                    await generate_context_recall_dataset(
+                        id, context_str, answer, run_parallel, model,
                         logger, fout)
                 case _:
                     pass

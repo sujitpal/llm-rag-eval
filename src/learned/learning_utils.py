@@ -67,11 +67,36 @@ def string_to_bool(s: str, choices: List[str]) -> bool:
         :return: boolean
     """
     matches = [i for i, c in enumerate(choices)
-                if re.search(c.lower(), s.lower()) is not None]
+               if re.search(c.lower(), s.lower()) is not None]
     if len(matches) == 0:
         return False
     else:
         return True if matches[0] == 0 else False
+
+
+def string_to_bool_array(s: str, choices: List[str]) -> List[bool]:
+    """ Convert a string to a list of booleans given list of choices
+        representing True and False response
+
+        :param s: string to convert
+        :param choices: list of strings ["True", "False]
+        :return: counts for each choice found
+    """
+    patterns = [re.compile(c) for c in choices]
+    counts = [len(re.findall(p, s)) for p in patterns]
+    return counts
+
+
+def strip_newlines(s: str) -> str:
+    """ Strip newlines from a string
+
+        :param s: string to strip
+        :return: string with newlines stripped
+    """
+    s = re.sub(r"\n", " ", s)
+    s = re.sub(r"\s+", " ", s)
+    return s
+
 
 # xs = [
 #     "This is a sentence",

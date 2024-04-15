@@ -11,8 +11,8 @@ from learned.faithfulness import compute_faithfulness
 from learned.answer_relevance import compute_answer_relevance
 from learned.context_precision import compute_context_precision
 from learned.context_relevance import compute_context_relevance
-# from learned.context_recall import compute_context_recall
-# from learned.answer_similarity import compute_answer_similarity
+from learned.context_recall import compute_context_recall
+from prompted.answer_similarity import compute_answer_similarity
 # from learned.answer_correctness import compute_answer_correctness
 
 
@@ -103,14 +103,13 @@ def runner():
                 case Metrics.CONTEXT_RELEVANCE:
                     metric_value = compute_context_relevance(
                         question, context, optimized_prompts)
-                # case Metrics.CONTEXT_RECALL:
-                #     metric_value = await compute_context_recall(
-                #         context, ideal_answer, model, logger,
-                #         parallel=run_in_parallel,
-                #         cross_encoder=use_cross_encoder)
-                # case Metrics.ANSWER_SIMILARITY:
-                #     metric_value = compute_answer_similarity(
-                #         answer, ideal_answer, encoder, logger)
+                case Metrics.CONTEXT_RECALL:
+                    context = context.split("\n")
+                    metric_value = compute_context_recall(
+                        context, answer, optimized_prompts)
+                case Metrics.ANSWER_SIMILARITY:
+                    raise NotImplementedError(
+                        "Use prompted version of answer similarity")
                 # case Metrics.ANSWER_CORRECTNESS:
                 #     metric_value = compute_answer_correctness(
                 #         ideal_answer, answer, model, logger)

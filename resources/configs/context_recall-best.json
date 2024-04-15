@@ -1,0 +1,31 @@
+{
+  "attrib_clf": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "answer": [
+          "The purpose of the agreement known as 30x30 is to conserve and protect 30% of the planet's land and oceans by the year 2030.",
+          "This agreement aims to address the global biodiversity crisis and the impacts of climate change by preserving and restoring ecosystems, promoting sustainable land and ocean management practices, and safeguarding the habitats of numerous plant and animal species.",
+          "The goal is to ensure the long-term health and resilience of the planet's natural resources and to support the well-being of both human and non-human communities."
+        ],
+        "context_item": "- These include the agreement known as 30x30, adopted at the UN Conference on Biological Diversity (COP15) held in Montreal, Canada, in late 2022, which commits Parties to designate 30% of the world's land and sea masses as protected areas for biodiversity conservation by 2030.",
+        "rationale": "produce the scores. We start with the context item, which provides information about the 30x30 agreement. The first sentence of the answer provides a concise summary of the agreement's purpose, which is consistent with the information in the context item. The second sentence elaborates on the agreement's goals, which are also aligned with the information in the context item. The third sentence emphasizes the importance of the agreement for the long-term health of the planet and the well-being of human and non-human communities, which is not explicitly mentioned in the context item but is a reasonable inference based on the information provided.",
+        "scores": "yes, yes, yes"
+      },
+      {
+        "answer": "Amnesty International urged its supporters to write letters to the Nigerian government, calling for an independent investigation into the killings of the Ogoni 9 and for those responsible to be brought to justice. They also called for an end to the human rights abuses in the Niger Delta region and for the protection of the rights of the Ogoni people.",
+        "context": [
+          "Amnesty International called on its vast network of supporters to deluge Nigerian authorities first with appeals for the defenders\u2019 freedom, and later with letters of outrage."
+        ],
+        "score": "1.0"
+      }
+    ],
+    "signature_instructions": " Given a context item and an answer, for each sentence in the answer,\n        classify if the sentence can be attributed to the context item. ",
+    "signature_prefix": "Scores:",
+    "extended_signature_instructions": " Given a context item and an answer, for each sentence in the answer,\n        classify if the sentence can be attributed to the context item. ",
+    "extended_signature_prefix": "Scores:"
+  }
+}

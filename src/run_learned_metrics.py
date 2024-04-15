@@ -10,7 +10,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from learned.faithfulness import compute_faithfulness
 from learned.answer_relevance import compute_answer_relevance
 from learned.context_precision import compute_context_precision
-# from learned.context_relevance import compute_context_relevance
+from learned.context_relevance import compute_context_relevance
 # from learned.context_recall import compute_context_recall
 # from learned.answer_similarity import compute_answer_similarity
 # from learned.answer_correctness import compute_answer_correctness
@@ -100,10 +100,9 @@ def runner():
                 case Metrics.CONTEXT_UTILIZATION:
                     metric_value = compute_context_precision(
                         question, context, answer, optimized_prompts)
-                # case Metrics.CONTEXT_RELEVANCE:
-                #     metric_value = await compute_context_relevance(
-                #         question, context, model, logger,
-                #         parallel=run_in_parallel)
+                case Metrics.CONTEXT_RELEVANCE:
+                    metric_value = compute_context_relevance(
+                        question, context, optimized_prompts)
                 # case Metrics.CONTEXT_RECALL:
                 #     metric_value = await compute_context_recall(
                 #         context, ideal_answer, model, logger,

@@ -9,11 +9,11 @@ from enum import Enum
 from langchain_google_genai import (
     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 )
-from typing import List
 
 import prompted.faithfulness as faithfulness_p
 import prompted.answer_relevance as answer_relevance_p
 import prompted.context_precision as context_precision_p
+import prompted.context_relevance as context_relevance_p
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -107,6 +107,33 @@ async def generate_context_precision_dataset(id: int,
     }) + "\n")
 
 
+async def generate_context_relevance_dataset(id: int,
+                                             question: str,
+                                             context_str: str,
+                                             run_parallel: bool,
+                                             model,
+                                             logger,
+                                             fout):
+    context = context_str.split("\n")
+    num_total_sents, context_markdowns = \
+        context_relevance_p._convert_to_markdown_lists(context)
+    score = 0.0
+    if num_total_sents > 0:
+        necessary_sents = \
+            await context_relevance_p._generate_necessity_verdicts(
+                question, context_markdowns, run_parallel, model, logger)
+    score = context_relevance_p._compute_context_relevance_score(
+        num_total_sents, necessary_sents)
+    fout.write(json.dumps({
+        "id": id,
+        "question": question,
+        "context": context,
+        "context_sents": context_markdowns,
+        "necessary_sents": necessary_sents,
+        "score": score
+    }) + "\n")
+
+
 async def runner():
 
     parser = argparse.ArgumentParser()
@@ -146,7 +173,7 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            if int(id) < 19:
+            if int(id) < 16:
                 continue
             question = record["query"]
             context_str = record["context"][0]["chunk_text"][0]
@@ -168,6 +195,10 @@ async def runner():
                     await generate_context_precision_dataset(
                         id, question, answer, context_str, run_parallel,
                         model, logger, fout)
+                case Metrics.CONTEXT_RELEVANCE:
+                    await generate_context_relevance_dataset(
+                        id, question, context_str, run_parallel, model,
+                        logger, fout)
                 case _:
                     pass
 

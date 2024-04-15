@@ -1,0 +1,25 @@
+{
+  "nec_classifier": {
+    "lm": null,
+    "traces": [],
+    "train": [],
+    "demos": [
+      {
+        "augmented": true,
+        "question": "Which right guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations?",
+        "ctx_sent": "The Act raises serious questions about its compatibility with the right to truth.",
+        "rationale": "produce the score. We need to know which right guarantees access to comprehensive information about past human rights violations, including the identities of the perpetrators and the fate of the victims, as well as the circumstances surrounding the violations. The sentence does not provide this information, so it is not absolutely necessary to answer the question.",
+        "score": "no"
+      },
+      {
+        "question": "What action did Amnesty International urge its supporters to take in response to the killing of the Ogoni 9?",
+        "context": "- Amnesty International called on its vast network of supporters to deluge Nigerian authorities first with appeals for the defenders\u2019 freedom, and later with letters of outrage.",
+        "score": "1.0"
+      }
+    ],
+    "signature_instructions": " Given a question and a sentence from the context, classify\n        if sentence is absolutely necessary to answer question\n    ",
+    "signature_prefix": "Score:",
+    "extended_signature_instructions": " Given a question and a sentence from the context, classify\n        if sentence is absolutely necessary to answer question\n    ",
+    "extended_signature_prefix": "Score:"
+  }
+}

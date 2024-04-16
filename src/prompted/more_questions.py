@@ -13,6 +13,12 @@ dspy.settings.configure(rm=colbertv2_wiki17_abstracts)
 
 PROMPT_MORE_QUESTIONS = "more_questions.txt"
 
+def split_newlines(input_string):
+    """Split the input string at newline characters and return a list of strings."""
+    if '\n' in input_string:
+        return input_string.split('\n')
+    else:
+        return [input_string]
 
 def compute_more_questions(question: str,
                                ideal_answer: str,
@@ -41,9 +47,15 @@ def compute_more_questions(question: str,
     result_tuples = result.value["tuples"]
     result_list = []
     for _ in result_tuples:
-        chunk = {"id": "1", "chunk_text": _["context"]}
-        r_dict = {"query": _["question"], "predicted_answer": _["answer"], "ideal_answer": _["answer"], "context": [chunk]}
+        chunks = []
+        context_lines = split_newlines(_["context"])
+        for i in range(len(context_lines)):
+            chunk_dict = {}
+            chunk_dict['id'] = str(i)
+            chunk_dict['chunk_text'] = context_lines[i]
+            chunks.append(chunk_dict)
+        r_dict = {"query": _["question"], "predicted_answer": _["answer"], "ideal_answer": _["answer"], "context": chunks}
         result_list.append(r_dict)
-    logger.debug("result_list: ", result_list)
+    logger.debug(f"result_list: \n{result_list}")
  
     return result_list

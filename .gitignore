@@ -163,3 +163,7 @@ cython_debug/
 **/data
 **/notes.txt
 **/try
+
+# mac thing
+.DS_Store
+**/.DS_Store

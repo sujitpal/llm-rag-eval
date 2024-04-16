@@ -42,6 +42,8 @@ async def runner():
                         help="The number of new questions to be generated PER question in input data (default 3)")
     parser.add_argument("--model-temp", type=float, required=False,
                         help="The temperature of the model - between 0.0 and 1.0 (default 0.0)")
+    parser.add_argument("--max", type=int, required=False,
+                        help="The maximum number of new questions to be generated total (no default)")
    
     args = parser.parse_args()
     # metric = args.metric
@@ -58,8 +60,13 @@ async def runner():
     multiplier = args.multiplier
     if multiplier is None:
         multiplier = 3
+    model_temp = args.model_temp
     if model_temp is None or model_temp > 1.0 or model_temp < 0.0:
         model_temp = 0.0
+    maxq = args.max
+    if maxq is None:
+        maxq = 99999
+    
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG if debug else logging.INFO)
 
@@ -76,13 +83,15 @@ async def runner():
          open(output_fp, "w", encoding="utf-8") as fout:
 
         # fout.write("\t".join(["#QID", metric.upper()]) + "\n")
+        q_counter = 0
         new_q_id = id_start
         for line in fin:
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) > 3:
-            #     continue
+            # be done if hit max
+            if q_counter + multiplier > maxq:
+                break
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
@@ -90,6 +99,8 @@ async def runner():
             
             more_questions = compute_more_questions(
                 question, ideal_answer, multiplier, model, logger)
+            
+            q_counter = q_counter + multiplier
 
             for q in more_questions:
                 q["id"] = new_q_id

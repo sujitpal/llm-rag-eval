@@ -17,7 +17,7 @@ from prompted.answer_similarity import compute_answer_similarity
 
 
 DATA_DIR = "../data"
-REPORTS_DIR = os.path.join(DATA_DIR, "reports")
+REPORTS_DIR = os.path.join(DATA_DIR, "dspy-reports")
 
 
 class Metrics(Enum):

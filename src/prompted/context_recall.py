@@ -86,7 +86,7 @@ async def compute_context_recall(context: List[str],
                                  parallel: bool = True) -> float:
 
     answer_md = _convert_answer_to_markdown_list(answer, logger)
-    inferences = _classify_ans_sents_attributable_to_context(
+    inferences = await _classify_ans_sents_attributable_to_context(
         answer_md, context, parallel, model, logger)
     score = _compute_context_recall_score(inferences)
     return score

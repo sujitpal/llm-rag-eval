@@ -22,10 +22,6 @@ from prompted.answer_correctness import compute_answer_correctness
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
-DATA_DIR = "../data"
-REPORTS_DIR = os.path.join(DATA_DIR, "reports")
-
-
 class Metrics(Enum):
     FAITHFULNESS = "faithfulness"
     ANSWER_RELEVANCE = "answer_relevance"
@@ -46,8 +42,8 @@ async def runner():
                         help="The metric to compute")
     parser.add_argument("--input", type=str, required=True,
                         help="Full path to evaluation data in JSONL format")
-    parser.add_argument("--output", type=str, required=False,
-                        help="Full path to output TSV file")
+    parser.add_argument("--output", type=str, required=True,
+                        help="Full path to output directory")
     parser.add_argument("--parallel", action="store_true",
                         help="Run in parallel where possible (default false)")
     parser.add_argument("--cross-encoder", action="store_false",
@@ -59,9 +55,7 @@ async def runner():
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input
-    output_fp = args.output
-    if output_fp is None:
-        output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
+    output_dir = args.output
     run_in_parallel = args.parallel
     use_cross_encoder = args.cross_encoder
     model_temp = args.model_temp
@@ -80,7 +74,8 @@ async def runner():
         temperature=model_temp)
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-    os.makedirs(REPORTS_DIR, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+    output_fp = os.path.join(output_dir, f"{metric}_report.tsv")
 
     with open(input_fp, "r", encoding="utf-8") as fin, \
          open(output_fp, "w", encoding="utf-8") as fout:
@@ -90,10 +85,10 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) != 15:
+            # if int(id) != 14:
             #     continue
             question = record["query"]
-            context = record["context"][0]["chunk_text"][0].split("\n")
+            context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
 
@@ -121,11 +116,11 @@ async def runner():
                 case Metrics.CONTEXT_RECALL:
                     metric_value = await compute_context_recall(
                         context, ideal_answer, model, logger,
-                        parallel=run_in_parallel,
-                        cross_encoder=use_cross_encoder)
+                        parallel=run_in_parallel)
                 case Metrics.ANSWER_SIMILARITY:
                     metric_value = compute_answer_similarity(
-                        answer, ideal_answer, encoder, logger)
+                        answer, ideal_answer, encoder, logger,
+                        cross_encoder=use_cross_encoder)
                 case Metrics.ANSWER_CORRECTNESS:
                     metric_value = compute_answer_correctness(
                         ideal_answer, answer, model, logger)
@@ -135,7 +130,6 @@ async def runner():
             logger.info(
                 f"query ({id}): {question}, {metric}: {metric_value}")
             fout.write(f"{id}\t{metric_value:.3f}\n")
-            # break
 
 
 if __name__ == "__main__":

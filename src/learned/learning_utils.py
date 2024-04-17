@@ -1,3 +1,4 @@
+import logging
 import re
 
 from typing import List
@@ -98,22 +99,25 @@ def strip_newlines(s: str) -> str:
     return s
 
 
-# xs = [
-#     "This is a sentence",
-#     "This is another sentence",
-#     "This is a third sentence",
-#     "This is a fourth sentence",
-#     "This is our last sentence"
-# ]
-# print("-- list to str --")
-# text = list_to_string(xs, style="number")
-# print(text)
+def log(message: str, level=logging.INFO, debug: bool = False):
+    """ Log a message if debug is True
 
-# print("-- str to list --")
-# strlist = string_to_list(text, style="number")
-# for s in strlist:
-#     print(s)
+        :param message: message to log
+        :param level: logging level
+        :param debug: boolean flag
+    """
+    if debug:
+        if level == logging.DEBUG:
+            print(f"[DEBUG]: {message}")
+        else:
+            print(f"[INFO]: {message}")
+    else:
+        if level == logging.INFO:
+            print(f"[INFO]: {message}")
 
-# print("--- full circle ---")
-# text2 = list_to_string(strlist, style="dash")
-# print(text2)
+
+def score_metric(example, pred, trace=None):
+    if trace is None:
+        return 1.0 - abs(float(example.score) - float(pred.score))
+    else:
+        return float(pred.score)    # inference

@@ -90,7 +90,7 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) <= 20:
+            # if int(id) != 15:
             #     continue
             question = record["query"]
             context = record["context"][0]["chunk_text"][0].split("\n")

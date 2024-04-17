@@ -12,8 +12,7 @@ from learned.answer_relevance import compute_answer_relevance
 from learned.context_precision import compute_context_precision
 from learned.context_relevance import compute_context_relevance
 from learned.context_recall import compute_context_recall
-from prompted.answer_similarity import compute_answer_similarity
-# from learned.answer_correctness import compute_answer_correctness
+from learned.answer_correctness import compute_answer_correctness
 
 
 DATA_DIR = "../data"
@@ -52,7 +51,6 @@ def runner():
     output_fp = args.output
     if output_fp is None:
         output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
-    use_cross_encoder = args.cross_encoder
     model_temp = args.model_temp
     if model_temp is None or model_temp > 1.0 or model_temp < 0.0:
         model_temp = 0.0
@@ -62,7 +60,7 @@ def runner():
     model = dspy.Google("models/gemini-1.0-pro",
                         api_key=os.environ["GOOGLE_API_KEY"],
                         max_output_tokens=1024,
-                        temperature=0.3)
+                        temperature=0.0)
     dspy.settings.configure(lm=model)
 
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
@@ -79,8 +77,8 @@ def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) < 19:
-            #     continue
+            if int(id) < 19:
+                continue
             question = record["query"]
             context = record["context"][0]["chunk_text"][0]
             answer = record["predicted_answer"]
@@ -110,9 +108,9 @@ def runner():
                 case Metrics.ANSWER_SIMILARITY:
                     raise NotImplementedError(
                         "Use prompted version of answer similarity")
-                # case Metrics.ANSWER_CORRECTNESS:
-                #     metric_value = compute_answer_correctness(
-                #         ideal_answer, answer, model, logger)
+                case Metrics.ANSWER_CORRECTNESS:
+                    metric_value = compute_answer_correctness(
+                        ideal_answer, answer, optimized_prompts)
                 case _:
                     print(f"Unsupported metric: {metric}")
 

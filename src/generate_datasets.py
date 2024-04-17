@@ -15,6 +15,7 @@ import prompted.answer_relevance as answer_relevance_p
 import prompted.context_precision as context_precision_p
 import prompted.context_relevance as context_relevance_p
 import prompted.context_recall as context_recall_p
+import prompted.answer_correctness as answer_correctness_p
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
@@ -160,6 +161,30 @@ async def generate_context_recall_dataset(id: int,
     }) + "\n")
 
 
+async def generate_answer_correctness_dataset(id: int,
+                                              answer: str,
+                                              ideal_answer: str,
+                                              model,
+                                              logger,
+                                              fout):
+    classification = answer_correctness_p._do_classification(
+        answer, ideal_answer, model, logger)
+    statements_by_class_dict = {}
+    for key in ["TP", "FP", "FN"]:
+        statements_by_class_dict[key] = \
+            answer_correctness_p._get_statements_for_class(
+                classification, key)
+    score = answer_correctness_p._compute_answer_correctness_score(
+        statements_by_class_dict)
+    fout.write(json.dumps({
+        "id": id,
+        "answer": answer,
+        "ideal_answer": ideal_answer,
+        "classification": statements_by_class_dict,
+        "score": score
+        }) + "\n")
+
+
 async def runner():
 
     parser = argparse.ArgumentParser()
@@ -199,7 +224,7 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            # if int(id) < 16:
+            # if int(id) < 19:
             #     continue
             question = record["query"]
             context_str = record["context"][0]["chunk_text"][0]
@@ -229,6 +254,12 @@ async def runner():
                     await generate_context_recall_dataset(
                         id, context_str, answer, run_parallel, model,
                         logger, fout)
+                case Metrics.ANSWER_SIMILARITY:
+                    raise NotImplementedError(
+                        "Use prompted version of answer similarity")
+                case Metrics.ANSWER_CORRECTNESS:
+                    await generate_answer_correctness_dataset(
+                        id, answer, ideal_answer, model, logger, fout)
                 case _:
                     pass
 

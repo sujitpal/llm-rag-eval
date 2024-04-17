@@ -9,6 +9,7 @@ from enum import Enum
 from langchain_google_genai import (
     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 )
+from typing import List
 
 import prompted.faithfulness as faithfulness_p
 import prompted.answer_relevance as answer_relevance_p
@@ -35,20 +36,17 @@ class Metrics(Enum):
 async def generate_faithfulness_dataset(id: int,
                                         question: str,
                                         answer: str,
-                                        context_str: str,
+                                        context: List[str],
                                         run_parallel: bool,
                                         model,
                                         logger,
                                         fout):
     statements = faithfulness_p._get_statements_from_answer(
         question, answer, model, logger)
-    context = context_str.split("\n")
     entailments = await faithfulness_p._get_entailments_from_context(
         context, statements, model, logger,
         parallel=run_parallel)
-    score = await faithfulness_p.compute_faithfulness(
-        question, answer, context, model, logger,
-        parallel=run_parallel)
+    score = faithfulness_p._compute_faithfulness(entailments)
     fout.write(json.dumps({
         "id": id,
         "question": question,
@@ -62,13 +60,14 @@ async def generate_faithfulness_dataset(id: int,
 
 async def generate_answer_relevance_dataset(id: int,
                                             question: str,
-                                            context_str: str,
+                                            context: List[str],
                                             answer: str,
                                             run_parallel: bool,
                                             model,
                                             encoder,
                                             logger,
                                             fout):
+    context_str = answer_relevance_p._flatten_context(context)
     gen_questions = \
         answer_relevance_p._generate_questions_from_answer_and_context(
             context_str, answer, 5, model, logger)
@@ -80,7 +79,7 @@ async def generate_answer_relevance_dataset(id: int,
     fout.write(json.dumps({
         "id": id,
         "question": question,
-        "context": context_str.split("\n"),
+        "context": context,
         "answer": answer,
         "gen_questions": gen_questions,
         "non_commitals": [qap.noncommittal for qap in qa_pairs],
@@ -91,19 +90,18 @@ async def generate_answer_relevance_dataset(id: int,
 async def generate_context_precision_dataset(id: int,
                                              question: str,
                                              answer: str,
-                                             context_str: str,
+                                             context: List[str],
                                              run_parallel: bool,
                                              model,
                                              logger,
                                              fout):
-    cnntext = context_str.split("\n")
     precs = await context_precision_p._compute_usefulness_scores(
-        question, cnntext, answer, run_parallel, model, logger)
+        question, context, answer, run_parallel, model, logger)
     score = context_precision_p._compute_content_precision(precs)
     fout.write(json.dumps({
         "id": id,
         "question": question,
-        "context": cnntext,
+        "context": context,
         "answer": answer,
         "precision": precs,
         "score": score
@@ -112,12 +110,11 @@ async def generate_context_precision_dataset(id: int,
 
 async def generate_context_relevance_dataset(id: int,
                                              question: str,
-                                             context_str: str,
+                                             context: List[str],
                                              run_parallel: bool,
                                              model,
                                              logger,
                                              fout):
-    context = context_str.split("\n")
     num_total_sents, context_markdowns = \
         context_relevance_p._convert_to_markdown_lists(context)
     score = 0.0
@@ -138,13 +135,12 @@ async def generate_context_relevance_dataset(id: int,
 
 
 async def generate_context_recall_dataset(id: int,
-                                          context_str: str,
+                                          context: List[str],
                                           answer: str,
                                           run_parallel: bool,
                                           model,
                                           logger,
                                           fout):
-    context = context_str.split("\n")
     answer_md = context_recall_p._convert_answer_to_markdown_list(
         answer, logger)
     inferences = await \
@@ -224,10 +220,10 @@ async def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            # if int(id) < 19:
+            # if int(id) != 14:
             #     continue
             question = record["query"]
-            context_str = record["context"][0]["chunk_text"][0]
+            context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
 
@@ -236,23 +232,23 @@ async def runner():
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     await generate_faithfulness_dataset(
-                        id, question, answer, context_str, run_parallel,
+                        id, question, answer, context, run_parallel,
                         model, logger, fout)
                 case Metrics.ANSWER_RELEVANCE:
                     await generate_answer_relevance_dataset(
-                        id, question, context_str, answer, run_parallel,
+                        id, question, context, answer, run_parallel,
                         model, encoder, logger, fout)
                 case Metrics.CONTEXT_PRECISION:
                     await generate_context_precision_dataset(
-                        id, question, answer, context_str, run_parallel,
+                        id, question, answer, context, run_parallel,
                         model, logger, fout)
                 case Metrics.CONTEXT_RELEVANCE:
                     await generate_context_relevance_dataset(
-                        id, question, context_str, run_parallel, model,
+                        id, question, context, run_parallel, model,
                         logger, fout)
                 case Metrics.CONTEXT_RECALL:
                     await generate_context_recall_dataset(
-                        id, context_str, answer, run_parallel, model,
+                        id, context, answer, run_parallel, model,
                         logger, fout)
                 case Metrics.ANSWER_SIMILARITY:
                     raise NotImplementedError(
@@ -262,8 +258,6 @@ async def runner():
                         id, answer, ideal_answer, model, logger, fout)
                 case _:
                     pass
-
-            # break
 
 
 if __name__ == "__main__":

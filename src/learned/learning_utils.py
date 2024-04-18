@@ -1,4 +1,3 @@
-import logging
 import re
 import os
 
@@ -98,23 +97,6 @@ def strip_newlines(s: str) -> str:
     s = re.sub(r"\n", " ", s)
     s = re.sub(r"\s+", " ", s)
     return s
-
-
-def log(message: str, level=logging.INFO, debug: bool = False):
-    """ Log a message if debug is True
-
-        :param message: message to log
-        :param level: logging level
-        :param debug: boolean flag
-    """
-    if debug:
-        if level == logging.DEBUG:
-            print(f"[DEBUG]: {message}")
-        else:
-            print(f"[INFO]: {message}")
-    else:
-        if level == logging.INFO:
-            print(f"[INFO]: {message}")
 
 
 def score_metric(example, pred, trace=None):

@@ -1,7 +1,6 @@
 import dspy
 import glob
 import json
-import logging
 import numpy as np
 import os
 import shutil
@@ -11,7 +10,7 @@ from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from sklearn.model_selection import train_test_split
 from typing import Dict
 
-from .learning_utils import log, score_metric
+from .learning_utils import score_metric
 
 
 DATA_DIR = "../data"

@@ -12,7 +12,7 @@ from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from sklearn.model_selection import train_test_split
 from typing import List
 
-from .learning_utils import list_to_string, string_to_list, string_to_bool
+from .learning_utils import list_to_string, string_to_bool
 
 
 DATA_DIR = "../data"

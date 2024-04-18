@@ -77,10 +77,9 @@ def runner():
         fout.write("\t".join(["#QID", metric.upper()]) + "\n")
         for line in fin:
             record = json.loads(line)
-            # extract relevant data to evaluate
             id = record["id"]
-            if int(id) != 14:
-                continue
+            # if int(id) != 14:
+            #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
@@ -117,7 +116,6 @@ def runner():
 
             print(f"query ({id}): {question}, {metric}: {metric_value}")
             fout.write(f"{id}\t{metric_value:.3f}\n")
-            # break
 
     if not debug:
         clean_up_log_files()

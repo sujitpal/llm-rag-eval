@@ -1,7 +1,6 @@
 import dspy
 import glob
 import json
-import logging
 import numpy as np
 import os
 import shutil

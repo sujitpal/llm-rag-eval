@@ -5,14 +5,12 @@ import numpy as np
 import os
 import shutil
 
-from dotenv import load_dotenv, find_dotenv
 from dspy.evaluate import Evaluate
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from sklearn.model_selection import train_test_split
 from typing import List
 
-from .learning_utils import string_to_list, list_to_string, string_to_bool
+from .learning_utils import list_to_string, string_to_bool
 
 
 DATA_DIR = "../data"
@@ -141,7 +139,6 @@ def compute_context_precision(question: str,
     except KeyError:
         context_precision_opt = optimize_prompt()
         prompts_dict["context_precision"] = context_precision_opt
-    # context_str = list_to_string(context, style="number")
     pred = context_precision_opt(question=question,
                                  answer=answer,
                                  context=context)

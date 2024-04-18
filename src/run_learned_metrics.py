@@ -5,7 +5,6 @@ import logging
 import os
 
 from dotenv import find_dotenv, load_dotenv
-from enum import Enum
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from learned.faithfulness import compute_faithfulness
@@ -15,17 +14,7 @@ from learned.context_relevance import compute_context_relevance
 from learned.context_recall import compute_context_recall
 from learned.answer_correctness import compute_answer_correctness
 from learned.learning_utils import clean_up_log_files
-
-
-class Metrics(Enum):
-    FAITHFULNESS = "faithfulness"
-    ANSWER_RELEVANCE = "answer_relevance"
-    CONTEXT_PRECISION = "context_precision"
-    CONTEXT_UTILIZATION = "context_utilization"
-    CONTEXT_RELEVANCE = "context_relevance"
-    CONTEXT_RECALL = "context_recall"
-    ANSWER_SIMILARITY = "answer_similarity"
-    ANSWER_CORRECTNESS = "answer_correctness"
+from metrics import Metrics
 
 
 def runner():

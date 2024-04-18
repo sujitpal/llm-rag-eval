@@ -5,7 +5,6 @@ import logging
 import os
 
 from dotenv import find_dotenv, load_dotenv
-from enum import Enum
 from langchain_google_genai import (
     ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 )
@@ -17,20 +16,9 @@ from prompted.context_relevance import compute_context_relevance
 from prompted.context_recall import compute_context_recall
 from prompted.answer_similarity import compute_answer_similarity
 from prompted.answer_correctness import compute_answer_correctness
-
+from metrics import Metrics
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
-
-class Metrics(Enum):
-    FAITHFULNESS = "faithfulness"
-    ANSWER_RELEVANCE = "answer_relevance"
-    CONTEXT_PRECISION = "context_precision"
-    CONTEXT_UTILIZATION = "context_utilization"
-    CONTEXT_RELEVANCE = "context_relevance"
-    CONTEXT_RECALL = "context_recall"
-    ANSWER_SIMILARITY = "answer_similarity"
-    ANSWER_CORRECTNESS = "answer_correctness"
 
 
 async def runner():

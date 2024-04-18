@@ -41,20 +41,25 @@ class ContextPrecision(dspy.Module):
         self.usefulness_classifier = dspy.ChainOfThought(
             QuestionAnswerContextToUseful)
         
-    def forward(self, question: str, answer: str, context: str) -> str:
-        ctx_list = string_to_list(context)
+    def forward(self, question: str, answer: str,
+                context: List[str]) -> str:
+        dspy.logger.debug(f"input question: {question}, answer: {answer}, "
+                          f"context: {context}")
         scores, weights = [], []
-        for i, ctx in enumerate(ctx_list):
+        for i, ctx in enumerate(context):
             pred = self.usefulness_classifier(question=question,
                                               answer=answer,
                                               context=ctx)
             scores.append(string_to_bool(pred.score, choices=["yes", "no"]))
+        dspy.logger.debug(f"scores: {scores}")
         score = 0.0
         if len(scores) > 0:
             weights = [sum(scores[:i + 1]) / (i + 1) * scores[i]
                        for i in range(len(scores))]
+            dspy.logger.debug(f"weights: {weights}")
             score = (sum(w * s for w, s in
                          zip(weights, scores)) / len(scores))
+        dspy.logger.debug(f"score: {score}")
         return dspy.Prediction(score=str(score))
 
 
@@ -129,13 +134,14 @@ def optimize_prompt():
 
 def compute_context_precision(question: str,
                               answer: str,
-                              context: str,
+                              context: List[str],
                               prompts_dict):
     try:
         context_precision_opt = prompts_dict["context_precision"]
     except KeyError:
         context_precision_opt = optimize_prompt()
         prompts_dict["context_precision"] = context_precision_opt
+    # context_str = list_to_string(context, style="number")
     pred = context_precision_opt(question=question,
                                  answer=answer,
                                  context=context)

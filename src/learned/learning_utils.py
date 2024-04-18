@@ -1,5 +1,6 @@
 import logging
 import re
+import os
 
 from typing import List
 
@@ -121,3 +122,12 @@ def score_metric(example, pred, trace=None):
         return 1.0 - abs(float(example.score) - float(pred.score))
     else:
         return float(pred.score)    # inference
+
+
+def clean_up_log_files():
+    log_files = ["openai_usage.log",
+                 "azure_openai_usage.log",
+                 "assertion.log"]
+    for log_file in log_files:
+        if os.path.exists(log_file):
+            os.remove(log_file)

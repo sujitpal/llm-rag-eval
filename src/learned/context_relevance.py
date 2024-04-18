@@ -10,6 +10,7 @@ import time
 from dspy.evaluate import Evaluate
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from sklearn.model_selection import train_test_split
+from typing import List
 
 from .learning_utils import list_to_string, string_to_list, string_to_bool
 
@@ -37,9 +38,10 @@ class ContextRelevance(dspy.Module):
         super().__init__()
         self.nec_classifier = dspy.ChainOfThought(QuestionCtxSentToScore)
 
-    def forward(self, question: str, context: str):
+    def forward(self, question: str, context: List[str]):
+        dspy.logger.debug(f"input question: {question}, context: {context}")
         ctx_scores = []
-        for ctx in string_to_list(context):
+        for ctx in context:
             sent_scores = []
             for ctx_sent in nltk.sent_tokenize(ctx):
                 score = self.nec_classifier(question=question,
@@ -51,9 +53,11 @@ class ContextRelevance(dspy.Module):
                 ctx_scores.append(sum(sent_scores) / len(sent_scores))
             # to prevent ResourceExhaustedError
             time.sleep(0.3)
+        dspy.logger.debug(f"context scores: {ctx_scores}")
         score = 0.0
         if len(ctx_scores) > 0:
             score = sum(ctx_scores) / len(ctx_scores)
+        dspy.logger.debug(f"score: {score}")
         return dspy.Prediction(score=str(score))
 
 
@@ -126,7 +130,7 @@ def optimize_prompt():
 
 
 def compute_context_relevance(question: str,
-                              context: str,
+                              context: List[str],
                               prompts_dict):
     try:
         context_relevance_opt = prompts_dict["context_relevance"]

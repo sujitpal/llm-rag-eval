@@ -38,9 +38,11 @@ class ContextRecall(dspy.Module):
         self.attrib_clf = dspy.ChainOfThought(ContextItemAnswerToScore)
 
     def forward(self, context: List[str], answer: str):
+        dspy.logger.debug(f"input context: {context}, answer: {answer}")
         answer_sents = [sent for sent
                         in nltk.sent_tokenize(answer.replace("\n", ""))
                         if len(sent.strip()) > 0][0:10]
+        dspy.logger.debug(f"answer sentences: {answer_sents}")
         scores = []
         for context_item in context:
             if len(context_item.strip()) < 10:
@@ -58,9 +60,11 @@ class ContextRecall(dspy.Module):
                 pass
             # print(f"context: {context_item}, score: {ctx_score}")
             scores.append(ctx_score)
+        dspy.logger.debug(f"scores: {scores}")
         score = 0.0
         if len(scores) > 0:
             score = np.mean(scores)
+        dspy.logger.debug(f"score: {score}")
         return dspy.Prediction(score=str(score))
 
 

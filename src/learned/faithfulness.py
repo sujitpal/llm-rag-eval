@@ -1,6 +1,7 @@
 import dspy
 import glob
 import json
+import logging
 import numpy as np
 import os
 import shutil
@@ -8,6 +9,7 @@ import shutil
 from dspy.evaluate import Evaluate
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from sklearn.model_selection import train_test_split
+from typing import List
 
 from .learning_utils import list_to_string, string_to_list, string_to_bool
 
@@ -45,12 +47,17 @@ class Faithfulness(dspy.Module):
         self.scorer = dspy.Predict(ContextFactsToScore)
 
     def forward(self, question: str, answer: str, context: str):
+        dspy.logger.debug(f"input question: {question}, answer: {answer}, "
+                          f"context: {context}")
         facts = self.extractor(question=question, answer=answer).facts
+        dspy.logger.debug(f"facts: {facts}")
         scores = []
         for fact in string_to_list(facts):
             can_infer = self.scorer(context=context, fact=fact).score
             scores.append(string_to_bool(can_infer, ["yes", "no"]))
+        dspy.logger.debug(f"scores: {scores}")
         score = sum(scores) / len(scores)
+        dspy.logger.debug(f"score: {score}")
         return dspy.Prediction(score=str(score))
 
 
@@ -97,8 +104,9 @@ def optimize_prompt():
         examples = faithfulness_dataset(DATASET_FP)
         trainset, devset = train_test_split(examples, test_size=0.3,
                                             random_state=42)
-        print(f"fact extractor dataset sizes: "
-              f"{len(trainset)}, {len(devset)}, total: {len(examples)}")
+        print(
+            f"fact extractor dataset sizes: "
+            f"{len(trainset)}, {len(devset)}, total: {len(examples)}")
 
         print("--- training ---")
         faithfulness = Faithfulness()
@@ -129,7 +137,7 @@ def optimize_prompt():
 
 def compute_faithfulness(question: str,
                          answer: str,
-                         context: str,
+                         context: List[str],
                          prompts_dict):
     try:
         faithfulness_opt = prompts_dict["faithfulness"]
@@ -137,5 +145,6 @@ def compute_faithfulness(question: str,
         faithfulness_opt = optimize_prompt()
         prompts_dict["faithfulness"] = faithfulness_opt
     pred = faithfulness_opt(
-        question=question, answer=answer, context=context)
+        question=question, answer=answer,
+        context=list_to_string(context, style="number"))
     return float(pred.score)

@@ -57,18 +57,20 @@ class AnswerCorrectness(dspy.Module):
         return {k: len(v) for k, v in fact_groups_j.items()}
 
     def forward(self, answer, ground_truth):
+        dspy.logger.debug(f"input answer: {answer}, ground_truth: {ground_truth}")
         facts_g = self.fact_extractor(answer=ground_truth).facts
-        log(f"--- facts_g ---\n{facts_g}", logging.DEBUG, DEBUG)
+        dspy.logger.debug(f"facts from ground truth: {facts_g}")
         facts_a = self.fact_extractor(answer=answer).facts
-        log(f"--- facts_a ---\n{facts_a}", logging.DEBUG, DEBUG)
+        dspy.logger.debug(f"facts from answer: {facts_a}")
         fact_groups = self.fact_grouper(
             facts_g=facts_g, facts_a=facts_a).fact_groups
-        log(f"--- fact groups ---\n{fact_groups}", logging.DEBUG, DEBUG)
+        dspy.logger.debug(f"fact groups: {fact_groups}")
         group_counts = self._parse_json_response(fact_groups)
         tp = group_counts.get("TP", 0)
         fp = group_counts.get("FP", 0)
         fn = group_counts.get("FN", 0)
         score = tp / (tp + 0.5 * (fp + fn)) if tp > 0 else 0.0
+        dspy.logger.debug(f"tp: {tp}, fp: {fp}, fn: {fn}, score: {score}")
         return dspy.Prediction(score=score)
 
 

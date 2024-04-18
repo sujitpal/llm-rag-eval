@@ -1,6 +1,7 @@
 import argparse
 import dspy
 import json
+import logging
 import os
 
 from dotenv import find_dotenv, load_dotenv
@@ -13,10 +14,7 @@ from learned.context_precision import compute_context_precision
 from learned.context_relevance import compute_context_relevance
 from learned.context_recall import compute_context_recall
 from learned.answer_correctness import compute_answer_correctness
-
-
-DATA_DIR = "../data"
-REPORTS_DIR = os.path.join(DATA_DIR, "dspy-reports")
+from learned.learning_utils import clean_up_log_files
 
 
 class Metrics(Enum):
@@ -39,33 +37,37 @@ def runner():
                         help="The metric to compute")
     parser.add_argument("--input", type=str, required=True,
                         help="Full path to evaluation data in JSONL format")
-    parser.add_argument("--output", type=str, required=False,
-                        help="Full path to output TSV file")
+    parser.add_argument("--output", type=str, required=True,
+                        help="Full path to output directory")
     parser.add_argument("--cross-encoder", action="store_false",
                         help="Use cross-encoder similarity scoring (default true)")
     parser.add_argument("--model-temp", type=float, required=False,
                         help="The temperature of the model - between 0.0 and 1.0 (default 0.0)")
+    parser.add_argument("--debug", action="store_true",
+                        help="Turn debugging on (default: false)")
+
     args = parser.parse_args()
     metric = args.metric
     input_fp = args.input
-    output_fp = args.output
-    if output_fp is None:
-        output_fp = os.path.join(REPORTS_DIR, f"{metric}_report.tsv")
+    output_dir = args.output
     model_temp = args.model_temp
     if model_temp is None or model_temp > 1.0 or model_temp < 0.0:
         model_temp = 0.0
+    debug = args.debug
 
     _ = load_dotenv(find_dotenv())
 
     model = dspy.Google("models/gemini-1.0-pro",
                         api_key=os.environ["GOOGLE_API_KEY"],
                         max_output_tokens=1024,
-                        temperature=0.0)
+                        temperature=model_temp)
     dspy.settings.configure(lm=model)
+    dspy.logger.level = logging.DEBUG if debug else logging.INFO
 
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-    os.makedirs(REPORTS_DIR, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
+    output_fp = os.path.join(output_dir, f"{metric}_report.tsv")
 
     optimized_prompts = {}
 
@@ -77,13 +79,13 @@ def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            if int(id) < 19:
+            if int(id) != 14:
                 continue
             question = record["query"]
-            context = record["context"][0]["chunk_text"][0]
+            context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
-
+            
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     metric_value = compute_faithfulness(
@@ -94,15 +96,14 @@ def runner():
                         encoder)
                 case Metrics.CONTEXT_PRECISION:
                     metric_value = compute_context_precision(
-                        question, context, ideal_answer, optimized_prompts)
+                        question, ideal_answer, context, optimized_prompts)
                 case Metrics.CONTEXT_UTILIZATION:
                     metric_value = compute_context_precision(
-                        question, context, answer, optimized_prompts)
+                        question, answer, context, optimized_prompts)
                 case Metrics.CONTEXT_RELEVANCE:
                     metric_value = compute_context_relevance(
                         question, context, optimized_prompts)
                 case Metrics.CONTEXT_RECALL:
-                    context = context.split("\n")
                     metric_value = compute_context_recall(
                         context, answer, optimized_prompts)
                 case Metrics.ANSWER_SIMILARITY:
@@ -118,6 +119,8 @@ def runner():
             fout.write(f"{id}\t{metric_value:.3f}\n")
             # break
 
+    if not debug:
+        clean_up_log_files()
 
 if __name__ == "__main__":
     runner()

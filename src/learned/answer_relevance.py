@@ -66,15 +66,20 @@ class AnswerRelevance(dspy.Module):
         return self._cosine_similarity(source, targets)
     
     def forward(self, question: str, answer: str, context: str):
+        dspy.logger.debug(f"input question: {question}, answer: {answer}, "
+                          f"context: {context}")
         gen_questions = self.question_generator(
             answer=answer, context=context).gen_questions
+        dspy.logger.debug(f"gen_questions: {gen_questions}")
         q_list = [question]
         for gen_q in string_to_list(gen_questions):
             ans_cls = self.answer_classifier(question=gen_q, context=context)
             noncommital = ans_cls.noncommital
             if not string_to_bool(noncommital, choices=["yes", "no"]):
                 q_list.append(gen_q)
+        dspy.logger.debug(f"q_list: {q_list}")
         score = self._compute_score(q_list)
+        dspy.logger.debug(f"score: {score}")
         return dspy.Prediction(score=str(score))
 
 
@@ -147,7 +152,7 @@ def optimize_prompt(encoder: GoogleGenerativeAIEmbeddings):
 
 
 def compute_answer_relevance(question: str,
-                             context: str,
+                             context: List[str],
                              answer: str,
                              prompts_dict, 
                              encoder):
@@ -156,6 +161,7 @@ def compute_answer_relevance(question: str,
     except KeyError:
         answer_relevance_opt = optimize_prompt(encoder)
         prompts_dict["answer_relevance"] = answer_relevance_opt
+    context_str = list_to_string(context, style="number")
     pred = answer_relevance_opt(
-        question=question, answer=answer, context=context)
+        question=question, answer=answer, context=context_str)
     return float(pred.score)

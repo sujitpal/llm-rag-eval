@@ -1,7 +1,15 @@
+import dspy
+import glob
 import re
+import numpy as np
 import os
+import shutil
 
-from typing import List
+from dspy.evaluate import Evaluate
+from dspy.teleprompt import BootstrapFewShotWithRandomSearch
+from sklearn.model_selection import train_test_split
+from typing import Callable, List
+
 
 STYLE_TO_CHAR = {
     "dash": "-",
@@ -100,10 +108,63 @@ def strip_newlines(s: str) -> str:
 
 
 def score_metric(example, pred, trace=None):
+    """ Common score metric used in all learning metrics """
     if trace is None:
         return 1.0 - abs(float(example.score) - float(pred.score))
     else:
         return float(pred.score)    # inference
+
+
+def optimize_prompt(metric_name: str,
+                    config_dir: str,
+                    dataset_generator_fn: Callable,
+                    dataset_fp: str,
+                    score_metric: Callable,
+                    metric_instance: dspy.Module):
+
+    config_fn_pattern = f"{metric_name}-*.json"
+    config_paths = glob.glob(os.path.join(config_dir, config_fn_pattern))
+    best_config_fp = os.path.join(config_dir, f"{metric_name}-best.json")
+
+    if len(config_paths) == 0:
+        teleprompter = BootstrapFewShotWithRandomSearch(
+            metric=score_metric,
+            max_bootstrapped_demos=2,
+            max_labeled_demos=2,
+            num_threads=1
+        )
+        examples = dataset_generator_fn(dataset_fp)
+        trainset, devset = train_test_split(examples, test_size=0.3,
+                                            random_state=42)
+        print(
+            f"fact extractor dataset sizes: "
+            f"{len(trainset)}, {len(devset)}, total: {len(examples)}")
+
+        print("--- training ---")
+        faithfulness = metric_instance
+        faithfulness_opt = teleprompter.compile(
+            faithfulness, trainset=trainset)
+        ensemble = [prog for *_, prog in
+                    faithfulness_opt.candidate_programs[:4]]
+        
+        os.makedirs(config_dir, exist_ok=True)
+        for idx, prog in enumerate(ensemble):
+            config_path = os.path.join(
+                config_dir, f"{metric_name}-{idx}.json")
+            config_paths.append(config_path)
+            prog.save(config_path)
+
+        print("--- evaluation ---")
+        evaluate = Evaluate(devset=devset, metric=score_metric,
+                            num_threads=1, display_progress=True)
+        scores = [evaluate(prog) for prog in ensemble]
+        print(f"Evaluation scores: {scores}")
+        best_prompt_id = np.argmax(scores)
+        shutil.copy(config_paths[best_prompt_id], best_config_fp)
+
+    prog = metric_instance
+    prog.load(best_config_fp)
+    return prog
 
 
 def clean_up_log_files():

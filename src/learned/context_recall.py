@@ -11,7 +11,7 @@ from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from sklearn.model_selection import train_test_split
 from typing import List
 
-from .learning_utils import string_to_bool_array
+from .learning_utils import string_to_bool_array, score_metric
 
 
 DATA_DIR = "../data"
@@ -88,20 +88,13 @@ def context_recall_dataset(file_path):
     return examples
 
 
-def context_recall_metric(example, pred, trace=None):
-    if trace is None:
-        return 1.0 - abs(float(example.score) - float(pred.score))
-    else:   
-        return float(pred.score)     # for inference
-
-
 def optimize_prompt():
 
     config_paths = glob.glob(os.path.join(CONFIGS_DIR, "context_recall-*.json"))
 
     if len(config_paths) == 0:
         teleprompter = BootstrapFewShotWithRandomSearch(
-            metric=context_recall_metric,
+            metric=score_metric,
             max_bootstrapped_demos=2,
             max_labeled_demos=2,
             num_threads=1
@@ -127,7 +120,7 @@ def optimize_prompt():
             prog.save(config_path)
 
         print("--- evaluation ---")
-        evaluate = Evaluate(devset=devset, metric=context_recall_metric,
+        evaluate = Evaluate(devset=devset, metric=score_metric,
                             num_threads=1, display_progress=True)
         scores = [evaluate(prog) for prog in ensemble]
         print(f"Evaluation scores: {scores}")

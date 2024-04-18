@@ -11,7 +11,10 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from sklearn.model_selection import train_test_split
 from typing import List
 
-from .learning_utils import string_to_list, list_to_string, string_to_bool
+from .learning_utils import (
+    string_to_list, list_to_string, string_to_bool,
+    score_metric
+)
 
 
 DATA_DIR = "../data"
@@ -103,20 +106,13 @@ def answer_relevance_dataset(file_path):
     return examples
 
 
-def answer_relevance_metric(example, pred, trace=None):
-    if trace is None:
-        return 1.0 - abs(float(example.score) - float(pred.score))
-    else:
-        return float(pred.score)
-
-
 def optimize_prompt(encoder: GoogleGenerativeAIEmbeddings):
     config_paths = glob.glob(
         os.path.join(CONFIGS_DIR, "answer_relevance-*.json"))
 
     if len(config_paths) == 0:
         teleprompter = BootstrapFewShotWithRandomSearch(
-            metric=answer_relevance_metric,
+            metric=score_metric,
             max_bootstrapped_demos=2,
             max_labeled_demos=2,
             num_threads=1)
@@ -139,7 +135,7 @@ def optimize_prompt(encoder: GoogleGenerativeAIEmbeddings):
             prog.save(config_path)
 
         print("--- evaluation ---")
-        evaluate = Evaluate(devset=devset, metric=answer_relevance_metric,
+        evaluate = Evaluate(devset=devset, metric=score_metric,
                             num_threads=1, display_progress=True)
         scores = [evaluate(prog) for prog in ensemble]
         print(f"Evaluation scores: {scores}")

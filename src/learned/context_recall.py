@@ -1,17 +1,12 @@
 import dspy
-import glob
 import json
 import nltk
 import numpy as np
 import os
-import shutil
 
-from dspy.evaluate import Evaluate
-from dspy.teleprompt import BootstrapFewShotWithRandomSearch
-from sklearn.model_selection import train_test_split
 from typing import List
 
-from .learning_utils import string_to_bool_array, score_metric
+from .learning_utils import string_to_bool_array, score_metric, optimize_prompt
 
 
 DATA_DIR = "../data"
@@ -88,57 +83,18 @@ def context_recall_dataset(file_path):
     return examples
 
 
-def optimize_prompt():
-
-    config_paths = glob.glob(os.path.join(CONFIGS_DIR, "context_recall-*.json"))
-
-    if len(config_paths) == 0:
-        teleprompter = BootstrapFewShotWithRandomSearch(
-            metric=score_metric,
-            max_bootstrapped_demos=2,
-            max_labeled_demos=2,
-            num_threads=1
-        )
-        examples = context_recall_dataset(DATASET_FP)
-        trainset, devset = train_test_split(examples, test_size=0.3,
-                                            random_state=42)
-        print(f"fact extractor dataset sizes: "
-              f"{len(trainset)}, {len(devset)}, total: {len(examples)}")
-
-        print("--- training ---")
-        context_recall = ContextRecall()
-        context_recall_opt = teleprompter.compile(
-            context_recall, trainset=trainset)
-        ensemble = [prog for *_, prog in
-                    context_recall_opt.candidate_programs[:4]]
-        
-        os.makedirs(CONFIGS_DIR, exist_ok=True)
-        for idx, prog in enumerate(ensemble):
-            config_path = os.path.join(
-                CONFIGS_DIR, f"context_recall-{idx}.json")
-            config_paths.append(config_path)
-            prog.save(config_path)
-
-        print("--- evaluation ---")
-        evaluate = Evaluate(devset=devset, metric=score_metric,
-                            num_threads=1, display_progress=True)
-        scores = [evaluate(prog) for prog in ensemble]
-        print(f"Evaluation scores: {scores}")
-        best_prompt_id = np.argmax(scores)
-        shutil.copy(config_paths[best_prompt_id], BEST_CONFIG)
-
-    prog = ContextRecall()
-    prog.load(BEST_CONFIG)
-    return prog
-
-
 def compute_context_recall(context: List[str],
                            answer: str,
                            prompts_dict):
     try:
         context_recall_opt = prompts_dict["context_recall"]
     except KeyError:
-        context_recall_opt = optimize_prompt()
+        context_recall_opt = optimize_prompt("context_recall",
+                                             CONFIGS_DIR,
+                                             context_recall_dataset,
+                                             DATASET_FP,
+                                             score_metric,
+                                             ContextRecall())
         prompts_dict["context_recall"] = context_recall_opt
     pred = context_recall_opt(context=context, answer=answer)
     return float(pred.score)

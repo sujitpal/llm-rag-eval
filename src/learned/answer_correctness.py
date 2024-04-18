@@ -1,16 +1,10 @@
 import dspy
-import glob
 import json
-import numpy as np
 import os
-import shutil
 
-from dspy.evaluate import Evaluate
-from dspy.teleprompt import BootstrapFewShotWithRandomSearch
-from sklearn.model_selection import train_test_split
 from typing import Dict
 
-from .learning_utils import score_metric
+from .learning_utils import score_metric, optimize_prompt
 
 
 DATA_DIR = "../data"
@@ -92,57 +86,18 @@ def answer_correctness_dataset(file_path):
     return examples
 
 
-def optimize_prompt():
-
-    config_paths = glob.glob(os.path.join(CONFIGS_DIR, "answer_correctness-*.json"))
-
-    if len(config_paths) == 0:
-        teleprompter = BootstrapFewShotWithRandomSearch(
-            metric=score_metric,
-            max_bootstrapped_demos=2,
-            max_labeled_demos=2,
-            num_threads=1
-        )
-        examples = answer_correctness_dataset(DATASET_FP)
-        trainset, devset = train_test_split(examples, test_size=0.3,
-                                            random_state=42)
-        print(f"fact extractor dataset sizes: "
-              f"{len(trainset)}, {len(devset)}, total: {len(examples)}")
-
-        print("--- training ---")
-        answer_correctness = AnswerCorrectness()
-        answer_correctness_opt = teleprompter.compile(
-            answer_correctness, trainset=trainset)
-        ensemble = [prog for *_, prog in
-                    answer_correctness_opt.candidate_programs[:4]]
-        
-        os.makedirs(CONFIGS_DIR, exist_ok=True)
-        for idx, prog in enumerate(ensemble):
-            config_path = os.path.join(
-                CONFIGS_DIR, f"answer_correctness-{idx}.json")
-            config_paths.append(config_path)
-            prog.save(config_path)
-
-        print("--- evaluation ---")
-        evaluate = Evaluate(devset=devset, metric=score_metric,
-                            num_threads=1, display_progress=True)
-        scores = [evaluate(prog) for prog in ensemble]
-        print(f"Evaluation scores: {scores}")
-        best_prompt_id = np.argmax(scores)
-        shutil.copy(config_paths[best_prompt_id], BEST_CONFIG)
-
-    prog = AnswerCorrectness()
-    prog.load(BEST_CONFIG)
-    return prog
-
-
 def compute_answer_correctness(answer: str,
                                ideal_answer: str,
                                prompts_dict) -> float:
     try:
         answer_correctness_opt = prompts_dict["answer_correctness"]
     except KeyError:
-        answer_correctness_opt = optimize_prompt()
+        answer_correctness_opt = optimize_prompt("answer_correctness",
+                                                 CONFIGS_DIR,
+                                                 answer_correctness_dataset,
+                                                 DATASET_FP,
+                                                 score_metric,
+                                                 AnswerCorrectness())
         prompts_dict["answer_correctness"] = answer_correctness_opt
     pred = answer_correctness_opt(answer=answer, ground_truth=ideal_answer)        
     return float(pred.score)

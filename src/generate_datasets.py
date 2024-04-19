@@ -21,6 +21,16 @@ from metrics import Metrics
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
+# Safety config
+
+from google.generativeai.types.safety_types import HarmBlockThreshold, HarmCategory
+
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH
+}
 
 async def generate_faithfulness_dataset(id: int,
                                         question: str,
@@ -199,7 +209,8 @@ async def runner():
     model = ChatGoogleGenerativeAI(
         model="gemini-pro",
         api_key=os.environ["GOOGLE_API_KEY"],
-        temperature=0.0)
+        temperature=0.0,
+        safety_settings=safety_settings)
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
     os.makedirs(args.output, exist_ok=True)

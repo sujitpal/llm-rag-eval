@@ -18,6 +18,16 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 DATA_DIR = "../data"
 REPORTS_DIR = os.path.join(DATA_DIR, "reports")
 
+# Safety config
+
+from google.generativeai.types.safety_types import HarmBlockThreshold, HarmCategory
+
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH
+}
 
 async def runner():
 
@@ -75,7 +85,8 @@ async def runner():
     model = ChatGoogleGenerativeAI(
         model="gemini-pro",
         api_key=os.environ["GOOGLE_API_KEY"],
-        temperature=model_temp)
+        temperature=model_temp,
+        safety_settings=safety_settings)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
 

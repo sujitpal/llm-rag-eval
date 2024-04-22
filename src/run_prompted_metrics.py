@@ -20,6 +20,16 @@ from metrics import Metrics
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
+# Safety config
+
+from google.generativeai.types.safety_types import HarmBlockThreshold, HarmCategory
+
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH
+}
 
 async def runner():
 
@@ -59,7 +69,8 @@ async def runner():
     model = ChatGoogleGenerativeAI(
         model="gemini-pro",
         api_key=os.environ["GOOGLE_API_KEY"],
-        temperature=model_temp)
+        temperature=model_temp,
+        safety_settings=safety_settings)
     encoder = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
     os.makedirs(output_dir, exist_ok=True)
@@ -73,8 +84,8 @@ async def runner():
             record = json.loads(line)
             # extract relevant data to evaluate
             id = record["id"]
-            # if int(id) != 14:
-            #     continue
+            if int(id) % 4 != 0:
+                continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]

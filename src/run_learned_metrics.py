@@ -16,6 +16,16 @@ from learned.answer_correctness import compute_answer_correctness
 from learned.learning_utils import clean_up_log_files
 from metrics import Metrics
 
+# Safety config
+
+from google.generativeai.types.safety_types import HarmBlockThreshold, HarmCategory
+
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH
+}
 
 def runner():
 
@@ -49,7 +59,8 @@ def runner():
     model = dspy.Google("models/gemini-1.0-pro",
                         api_key=os.environ["GOOGLE_API_KEY"],
                         max_output_tokens=1024,
-                        temperature=model_temp)
+                        temperature=model_temp,
+                        safety_settings=safety_settings)
     dspy.settings.configure(lm=model)
     dspy.logger.level = logging.DEBUG if debug else logging.INFO
 
@@ -67,13 +78,14 @@ def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            # if int(id) != 14:
+            # if int(id) % 4 != 0:
             #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
             
+
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     metric_value = compute_faithfulness(

@@ -114,6 +114,7 @@ def compute_answer_relevance(question: str,
                                                score_metric,
                                                AnswerRelevance(encoder=encoder))
         prompts_dict["answer_relevance"] = answer_relevance_opt
+    dspy.logger.debug(f"context: {context}")
     context_str = list_to_string(context, style="number")
     pred = answer_relevance_opt(
         question=question, answer=answer, context=context_str)

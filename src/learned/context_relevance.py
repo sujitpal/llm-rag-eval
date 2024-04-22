@@ -4,6 +4,20 @@ import nltk
 import os
 import time
 
+import ssl
+
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
+
+    nltk.download('punkt')
+
 from typing import List
 
 from .learning_utils import (

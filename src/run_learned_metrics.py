@@ -78,13 +78,14 @@ def runner():
         for line in fin:
             record = json.loads(line)
             id = record["id"]
-            # if int(id) != 14:
+            # if int(id) % 4 != 0:
             #     continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]
             ideal_answer = record["ideal_answer"]
             
+
             match Metrics(metric):
                 case Metrics.FAITHFULNESS:
                     metric_value = compute_faithfulness(

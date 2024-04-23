@@ -2,7 +2,7 @@
 
 Large Language Model (LLM) powered evaluator for Retrieval Augmented Generation (RAG) pipelines.
 
-<img src="figs/ragas-metrics.drawio.png"/>
+<img src="figs/ragas-metrics.png"/>
 
 ## Google AI Hackathon Submission
 

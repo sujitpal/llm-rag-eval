@@ -149,4 +149,4 @@ Visually, at least for some of the metrics, the DSPy approach seems to produce s
 | Context Precision | 0.191 | **0.178** |
 | Answer Relevance | **0.049** | 0.064 |
 
-As can be seen, for most of the metrics, optimized prompts from DSPy produce more confident scores by this metric. In many cases, the difference in standard deviations is quite small, which may be attributed to the relatively few examples we are working with.
+As can be seen, for most of the metrics, optimized prompts from DSPy produce more confident scores. In many cases, the difference is quite small, which may be attributed to the relatively few examples we are working with.

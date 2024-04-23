@@ -130,3 +130,23 @@ options:
   --model-temp MODEL_TEMP
                         The temperature of the model - between 0.0 and 1.0 (default 0.0)
 ```
+
+## Comparing Prompted vs Learned Metrics
+
+After computing the different metrics using the "prompted" approach using LCEL and the "optimized from data" approach using DSPy, we plot the scores as shown below.
+
+<img src="figs/score_distribs.png"/>
+
+Visually, at least for some of the metrics, the DSPy approach seems to produce scores whose histograms are narrower around 0 and 1. In order to quantify this intuition, we measure deviations of the scores from 0.5 on the upper and lower side, then compute the standard deviation of the deviations for both LCEL and DSPy scores for each metric. The results are summarized below.
+
+| Metric | LCEL | DSPy |
+|--------|------|------|
+| Faithfulness | 0.162 | **0.000** |
+| Context Relevance | 0.191 | **0.184** |
+| Answer Correctness | 0.194 | **0.193** |
+| Context Recall | 0.191 | **0.183** |
+| Context Utilization | **0.186** | 0.189 |
+| Context Precision | 0.191 | **0.178** |
+| Answer Relevance | **0.049** | 0.064 |
+
+As can be seen, for most of the metrics, optimized prompts from DSPy produce more confident scores by this metric. In many cases, the difference in standard deviations is quite small, which may be attributed to the relatively few examples we are working with.

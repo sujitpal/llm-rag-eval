@@ -6,33 +6,42 @@ Large Language Model (LLM) powered evaluator for Retrieval Augmented Generation 
 
 ## Google AI Hackathon Submission
 
+[Submission Video Link](https://youtu.be/yOIU65chc98)
+
 ### Inspiration
 
-The project is inspired by the [RAGAS project](https://github.com/explodinggradients/ragas) which provides various prompt based approaches to compute various metrics to evaluate a RAG pipeline, and by ideas in the [ARES paper](https://arxiv.org/abs/2311.09476), which attempts to calibrate these LLM evaluators against human evaluators.
+Our project is inspired by the RAGAS project which defines and implements 8 metrics to evaluate inputs and outputs of a Retrieval Augmented Generation (RAG) pipeline, and by ideas from the ARES paper, which attempts to calibrate these LLM evaluators against human evaluators.
 
 ### What it does
 
-It provides implementations of metrics that can be applied to outputs of a RAG pipeline in a zero-shot manner, and provides functionality to fine-tune models to generate these metrics targeted to one's use case using small amounts of human annotations.
+It allows users to build evaluation metrics for their RAG systems that are optimized for their domain.
 
 ### How we built it
 
-We used the [DSPy](https://github.com/stanfordnlp/dspy) framework from the ground up to replicate the metrics provided by RAGAS, then extended these metrics to allow for fine-tuning small models using small amounts of human generated evaluations.
+1. We re-implemented the RAGAS metrics using LangChain Expression Language (LCEL) so we could access outputs of intermediate steps in metrics calculation.
+2. We then implemented the metrics using DSPy (Declarative Self-improving Language Programs in Python) and optimized the prompts to minimize score difference with LCEL using a subset of examples for Few Shot Learning (using Bootstrap Few Shot with Random Search).
+3. We evaluated the confidence of scores produced by LCEL and DSPy metric implementations.
+4. We are building a tool that allows human oversight on the LCEL outputs (including intermediate steps) for Active Learning supervision.
+5. We will re-optimize the DSPy metrics using recalculated scores based on tool updates.
 
 ### Challenges we ran into
 
-TBD
+* DSPy has a steep learning curve and it is still a work in progress, so some parts of it don't work as expected
+* Our project grew iteratively as our understanding of the problem space grew, so we had to do some steps sequentially, leading to wasted time
 
 ### Accomplishments that we're proud of
 
-TBD
+* How team members from different parts of the world came together and pooled their skills towards our common goal of building a set of domain optimized metrics.
 
 ### What we learned
 
-TBD
+* We gained greater insight into the RAGAS metrics once we implemented them ourselves. We gained additional insight when building the tool using the intermediate outputs.
+* Our team was not familiar with DSPy at all, we learned to use it and are very impressed with its capabilities
 
 ### What's next for llm-rag-eval
 
-TBD
+We notice that most of our metrics involve predictive steps, where we predict a binary outcome given a pair of strings. These seem like variants of NLI (Natural Language Inference) which could be handled by non-LLM models, which are not only cheaper but also don't suffer from hallucinations, leading to more repeatable evaluations. It will require more data to train them, so we are starting to generate synthetic data, but this has other dependencies before we can start to offload these steps to smaller models.
+
 
 ## Running Prompted RAGAS metrics
 

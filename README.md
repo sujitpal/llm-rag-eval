@@ -10,7 +10,7 @@ Large Language Model (LLM) powered evaluator for Retrieval Augmented Generation 
 
 ### Inspiration
 
-Our project is inspired by the RAGAS project which defines and implements 8 metrics to evaluate inputs and outputs of a Retrieval Augmented Generation (RAG) pipeline, and by ideas from the ARES paper, which attempts to calibrate these LLM evaluators against human evaluators.
+Our project is inspired by the [RAGAS](https://github.com/explodinggradients/ragas) project which defines and implements 8 metrics to evaluate inputs and outputs of a Retrieval Augmented Generation (RAG) pipeline, and by ideas from the [ARES paper](https://arxiv.org/abs/2311.09476), which attempts to calibrate these LLM evaluators against human evaluators.
 
 ### What it does
 
@@ -18,8 +18,8 @@ It allows users to build evaluation metrics for their RAG systems that are optim
 
 ### How we built it
 
-1. We re-implemented the RAGAS metrics using LangChain Expression Language (LCEL) so we could access outputs of intermediate steps in metrics calculation.
-2. We then implemented the metrics using DSPy (Declarative Self-improving Language Programs in Python) and optimized the prompts to minimize score difference with LCEL using a subset of examples for Few Shot Learning (using Bootstrap Few Shot with Random Search).
+1. We re-implemented the RAGAS metrics using [LangChain Expression Language (LCEL)](https://python.langchain.com/docs/expression_language/) so we could access outputs of intermediate steps in metrics calculation.
+2. We then implemented the metrics using [DSPy (Declarative Self-improving Language Programs in Python)](https://github.com/stanfordnlp/dspy) and optimized the prompts to minimize score difference with LCEL using a subset of examples for Few Shot Learning (using Bootstrap Few Shot with Random Search).
 3. We evaluated the confidence of scores produced by LCEL and DSPy metric implementations.
 4. We are building a tool that allows human oversight on the LCEL outputs (including intermediate steps) for Active Learning supervision.
 5. We will re-optimize the DSPy metrics using recalculated scores based on tool updates.

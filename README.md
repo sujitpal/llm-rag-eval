@@ -159,3 +159,35 @@ Visually, at least for some of the metrics, the DSPy approach seems to produce s
 | Answer Relevance | **0.049** | 0.064 |
 
 As can be seen, for most of the metrics, optimized prompts from DSPy produce more confident scores. In many cases, the difference is quite small, which may be attributed to the relatively few examples we are working with.
+
+## Synthetic QA Dataset Creation
+
+One of the more difficult aspects of many ML challenges is the limited availability of curated datasets, particularly QA datasets.  
+
+For this reason, we developed a technique, using Gemini Pro, to create synthetic QA datasets from existing QA datasets, instructing the LLM what to do and providing examples of specific answers to questions.  With those examples, the LLM is able to create entirely new questions, propose answers, and provide one of more snippets of context for each question and answer pair.  
+
+These new QA datasets can then be used as input to the evaluation workflow.  
+
+Command-line switches allow a fair amount of flexibility in the output, such as ID numbering, how many output questions to create from each input questions, and the total # of questions to create.
+
+```
+python3 ./make_more_questions.py --help
+usage: make_more_questions.py [-h] --input-jsonl INPUT_JSONL [--output-jsonl OUTPUT_JSONL] [--debug]
+                              [--id-start ID_START] [--multiplier MULTIPLIER] [--model-temp MODEL_TEMP]
+                              [--max MAX]
+
+options:
+  -h, --help            show this help message and exit
+  --input-jsonl INPUT_JSONL
+                        Full path to evaluation data in JSONL format
+  --output-jsonl OUTPUT_JSONL
+                        Full path to output file
+  --debug               Turn debugging on (default: false)
+  --id-start ID_START   The number that the question ids in the output should start with (default 0)
+  --multiplier MULTIPLIER
+                        The number of new questions to be generated PER question in input data (default 3)
+  --model-temp MODEL_TEMP
+                        The temperature of the model - between 0.0 and 1.0 (default 0.0)
+  --max MAX             The maximum number of new questions to be generated total (no default)
+  ```
+  

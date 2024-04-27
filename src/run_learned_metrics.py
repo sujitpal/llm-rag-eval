@@ -42,6 +42,10 @@ def runner():
                         help="Use cross-encoder similarity scoring (default true)")
     parser.add_argument("--model-temp", type=float, required=False,
                         help="The temperature of the model - between 0.0 and 1.0 (default 0.0)")
+    parser.add_argument("--qs_to_skip", type=str, required=False,
+                        help="skip questions provided as a comma separated list of ints: '3,4,11'")
+    parser.add_argument("--qs_to_use", type=str, required=False,
+                        help="only use questions provided as a comma separated list of ints: '3,4,11'")
     parser.add_argument("--debug", action="store_true",
                         help="Turn debugging on (default: false)")
 
@@ -53,6 +57,17 @@ def runner():
     if model_temp is None or model_temp > 1.0 or model_temp < 0.0:
         model_temp = 0.0
     debug = args.debug
+    qs_to_skip = args.qs_to_skip
+    if qs_to_skip is None:
+        skip_qs = []
+    else:
+        skip_qs = list(map(int, qs_to_skip.split(',')))
+
+    qs_to_use = args.qs_to_use
+    if qs_to_use is None:
+        use_qs = []
+    else:
+        use_qs = list(map(int, qs_to_use.split(',')))
 
     _ = load_dotenv(find_dotenv())
 
@@ -80,6 +95,9 @@ def runner():
             id = record["id"]
             # if int(id) % 4 != 0:
             #     continue
+            # use_qs will override skip_qs
+            if int(id) in skip_qs and int(id) not in use_qs:
+                continue
             question = record["query"]
             context = [ctx["chunk_text"] for ctx in record["context"]]
             answer = record["predicted_answer"]

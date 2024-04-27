@@ -32,18 +32,11 @@ safety_settings = {
 async def runner():
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--metric", type=str,
-    #                     choices=sorted([m.value for m in Metrics]),
-    #                     required=True,
-    #                     help="The metric to compute")
+    
     parser.add_argument("--input-jsonl", type=str, required=True,
                         help="Full path to evaluation data in JSONL format")
-    parser.add_argument("--output-tsv", type=str, required=False,
-                        help="Full path to output TSV file")
-    parser.add_argument("--parallel", action="store_true",
-                        help="Run in parallel where possible (default false)")
-    # parser.add_argument("--cross-encoder", action="store_false",
-    #                     help="Use cross-encoder similarity scoring (default true)")
+    parser.add_argument("--output-jsonl", type=str, required=False,
+                        help="Full path to output file")
     parser.add_argument("--debug", action="store_true",
                         help="Turn debugging on (default: false)")
     parser.add_argument("--id-start", type=int, required=False,
@@ -56,13 +49,10 @@ async def runner():
                         help="The maximum number of new questions to be generated total (no default)")
    
     args = parser.parse_args()
-    # metric = args.metric
     input_fp = args.input_jsonl
-    output_fp = args.output_tsv
+    output_fp = args.output_jsonl
     if output_fp is None:
-        output_fp = os.path.join(REPORTS_DIR, f"default_report.tsv")
-    run_in_parallel = args.parallel
-    # use_cross_encoder = args.cross_encoder
+        output_fp = os.path.join(REPORTS_DIR, f"default_report.jsonl")
     debug = args.debug
     id_start = args.id_start
     if id_start is None:

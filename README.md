@@ -168,7 +168,7 @@ For this reason, we developed a technique, using Gemini Pro, to create synthetic
 
 These new QA datasets can then be used as input to the evaluation workflow.  
 
-Command-line switches allow a fair amount of flexibility in the output, such as ID numbering, how many output questions to create from each input questions, and the total # of questions to create.
+Command-line switches allow a fair amount of flexibility in the output, such as ID numbering, how many output questions to create from each input question, and the total # of questions to create.
 
 ```
 python3 ./make_more_questions.py --help
@@ -190,4 +190,3 @@ options:
                         The temperature of the model - between 0.0 and 1.0 (default 0.0)
   --max MAX             The maximum number of new questions to be generated total (no default)
   ```
-  

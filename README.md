@@ -14,7 +14,7 @@ Our project is inspired by the [RAGAS](https://github.com/explodinggradients/rag
 
 ### What it does
 
-It allows users to build evaluation metrics for their RAG systems that are optimized for their domain.
+It provides an LLM based framework to evaluate the performance of RAG systems using a set of metrics that are optimized for the application domain it (the RAG system) operates in. We have used the Gemini Pro 1.0 from Google AI as the LLM the framework uses. We have also used the Google AI embedding model to generate embeddings for some of the metrics.
 
 ### How we built it
 
